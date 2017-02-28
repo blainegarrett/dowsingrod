@@ -1,0 +1,14 @@
+application: dowsingrod
+version:  pydefault
+runtime: python27
+api_version: 1
+threadsafe: no
+module: default
+
+builtins:
+  - remote_api: on
+
+# index files
+handlers:
+- url: .*
+  script: main.app
