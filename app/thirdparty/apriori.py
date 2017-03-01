@@ -126,7 +126,7 @@ def printResults(items, rules):
     for item, support in sorted(items, key=lambda (item, support): support):
         print "item: %s , %.3f" % (str(item), support)
     print "\n------------------------ RULES:"
-    for rule, confidence in sorted(rules, key=lambda (rule, confidence): confidence):
+    for rule, confidence in rules: #sorted(rules, key=lambda (rule, confidence): confidence):
         pre, post = rule
 
         r = AssociationRule(pre, post, confidence)

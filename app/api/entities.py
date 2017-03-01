@@ -11,6 +11,9 @@ class PreferenceEntity(ndb.Model):
 
     synced_timestamp = ndb.DateTimeProperty(auto_now_add=True)  # Timestamp when pref synced
 
+    def get_rule_item_id(self):
+        return '%s:%s' % (self.item_id, str(int(self.pref)))
+
 
 class AssociationRuleEntity(ndb.Model):
     """ Persistance model for association rule """

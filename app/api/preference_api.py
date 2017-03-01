@@ -50,3 +50,31 @@ def _populate_entity(model):
     e = PreferenceEntity(**data)
 
     return e
+
+
+def query_preference_entities():
+    """
+    Query for preference entities
+    """
+    # TODO: Beef this up quite a bit
+    return PreferenceEntity.query().fetch(1000)
+
+
+def get_txn_data():
+    """
+    Query for all preferences and group into transaction list format
+
+    {'session_id': ['Peanut Butter', 'Beer', 'Jelly', Bread']}
+    """
+
+    txn_sets_map = {}
+
+    # Fetch data iterator for preference entities
+    preference_entities = query_preference_entities()
+
+    for pref in preference_entities:
+        if pref.user_id not in txn_sets_map:
+            txn_sets_map[pref.user_id] = set()
+        txn_sets_map[pref.user_id].add(pref.get_rule_item_id())
+
+    return txn_sets_map.values()

@@ -31,12 +31,31 @@ class DeleteRulesSince(MiningTestsBase):
 
 
 class RunAprioriTests(MiningTestsBase):
+    # TODO: This is more of an integration test
     def test_base(self):
+        """
+        Simple test to run the a priori algorhthim against our test shopping cart data
+        and check results against expectations.
+        """
 
-        # txn_models = []
         min_support = .2
-        min_confidence = .3
+        min_confidence = .7
 
         _, rule_models = mining_api.run_apriori(dataset.data2, min_support, min_confidence)
 
-        raise Exception(rule_models)
+        # Check some expectations
+        self.assertTrue(isinstance(rule_models, list))
+        self.assertEqual(len(rule_models), 31)
+        self.assertEqual(rule_models[0].__class__, mining_api.AssociationRuleEntity)
+
+        # Check a couple key results results
+        rule1 = rule_models[9]
+        self.assertEqual(rule1.ant, ['Jelly'])  # Single antecedant
+        self.assertEqual(rule1.con, ['Peanut Butter', 'Bread'])  # Multiple consequents
+        self.assertEqual(rule1.confidence, 0.8021978021978021)  # Non-0/1 confidence
+
+        # Check a couple key results results
+        rule2 = rule_models[-1]
+        self.assertEqual(rule2.ant, ['Butter', 'Peanut Butter', 'Bread'])  # Multiple antecedant
+        self.assertEqual(rule2.con, ['Jelly'])  # Single consequents
+        self.assertEqual(rule2.confidence, 1.0)  # 100% confidence
