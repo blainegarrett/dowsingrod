@@ -9,6 +9,9 @@ clean:
 	find . -name '*.pyo' -exec rm -f {} +
 	find . -name '*~' -exec rm -f {} +
 
+linklibs:
+	linkenv $(PYTHON_SITE_PACKAGES_PATH) app/external
+
 install:
 	pip install -Ur requirements_dev.txt
 	linkenv $(PYTHON_SITE_PACKAGES_PATH) app/external

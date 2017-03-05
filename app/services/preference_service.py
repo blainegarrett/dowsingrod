@@ -11,11 +11,17 @@ def record_preference(preference_models):
     Method to persist a preference or list of preferences
     """
 
+    is_single = False
     if not isinstance(preference_models, list):
+        is_single = True
         preference_models = [preference_models]
 
     # Iterate over all the persistance models and convert to ndb models
-    return preference_api.create_multi(preference_models)
+    preference_models = preference_api.create_multi(preference_models)
+
+    if (is_single):
+        return preference_models[0]
+    return preference_models
 
 
 def generate_association_rules(min_support, min_confidence):
@@ -29,3 +35,15 @@ def generate_association_rules(min_support, min_confidence):
     rule_models = mining_api.create_rules(rule_models)
 
     return rule_models
+
+
+def query_preferences(*args, **kwargs):
+    """
+    Query for a set of preferences - mostly used for debugging
+
+    TODO: This is currently returning ndb models from the api
+    """
+
+    return preference_api.query_preference_entities(*args, **kwargs)
+    # TODO: THIS NEEDS UNIT TESTS, ETC
+

@@ -3,6 +3,7 @@ Low level API surrounding preferences persistance
 """
 from google.appengine.ext import ndb
 from api.entities import PreferenceEntity
+from models import PreferenceModel
 
 
 def create(model):
@@ -30,8 +31,22 @@ def create_multi(models):
     # entity_keys = ndb.put_multi(entities_to_put)
     ndb.put_multi(entities_to_put)
 
-    # TODO: Rehydrate key and sync_timestamp
-    return models
+    return_models = []
+    for e in entities_to_put:
+        return_models.append(_populate_model(e))
+
+    return return_models
+
+
+def _populate_model(entity):
+    """
+    Populate a model from an ndb entity
+    """
+
+    # TODO: If we support a key, use it
+    m = PreferenceModel(entity.user_id, entity.item_id, entity.pref, entity.timestamp)
+    m.synced_timestamp = entity.synced_timestamp
+    return m
 
 
 def _populate_entity(model):
@@ -57,6 +72,7 @@ def query_preference_entities():
     Query for preference entities
     """
     # TODO: Beef this up quite a bit
+    # TODO: Conditionally case to Models...
     return PreferenceEntity.query().fetch(1000)
 
 

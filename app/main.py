@@ -6,11 +6,6 @@ import webapp2
 from webapp2_extras.routes import RedirectRoute
 
 import logging
-import os
-import sys
-
-# Add the external libs
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), 'thirdparty'))
 
 
 def handle_404(request, response, exception):
@@ -23,10 +18,18 @@ def handle_404(request, response, exception):
 
 # Define routes - currently this is only the written RSS feed
 web_routes = [
-    RedirectRoute('/api/rest/suggest',
-                  'handlers.rest.suggest.SuggestionHandler',
+    RedirectRoute('/api/rest/recommendations',
+                  'handlers.rest.recommendation_handlers.RecommendationsHandler',
                   strict_slash=True,
-                  name="index")]
-
+                  name="RecommendationsHandler"),
+    RedirectRoute('/api/rest/preferences/<resource_id:\w+>',
+                  'handlers.rest.preference_handlers.PreferenceDetailHandler',
+                  strict_slash=True,
+                  name="PreferenceDetailHandler"),
+    RedirectRoute('/api/rest/preferences',
+                  'handlers.rest.preference_handlers.PreferenceCollectionHandler',
+                  strict_slash=True,
+                  name="PreferenceCollectionHandler"),
+    ]
 app = webapp2.WSGIApplication(web_routes, debug=True)
 app.error_handlers[404] = handle_404

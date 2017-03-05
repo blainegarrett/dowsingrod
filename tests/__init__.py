@@ -4,14 +4,8 @@ Run via project root `make unit` or `make integration`
 """
 
 import unittest
-import os
-import sys
-
 from google.appengine.ext import testbed
 from google.appengine.datastore import datastore_stub_util
-
-# Add the external libs
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), '../app/'))
 
 
 class BaseCase(unittest.TestCase):
@@ -21,6 +15,7 @@ class BaseCase(unittest.TestCase):
     is_unit = True
 
     def setUp(self):
+
         # Create a consistency policy that will simulate the High Replication consistency model.
         self.policy = datastore_stub_util.PseudoRandomHRConsistencyPolicy(probability=0)
         self.policy = datastore_stub_util.PseudoRandomHRConsistencyPolicy(probability=1)

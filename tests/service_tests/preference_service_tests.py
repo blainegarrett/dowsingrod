@@ -8,15 +8,28 @@ class PreferenceServiceTestsBase(BaseCase):
     pass
 
 
-class CreateMultiTests(PreferenceServiceTestsBase):
-    def test_base(self):
+class RecprdPreferenceTests(PreferenceServiceTestsBase):
+    def test_multiple(self):
         t1 = None  # TODO: Miliseconds
         t2 = None  # TODO: Miliseconds
 
         p0 = PreferenceModel('u1', 'i1', True, t1)
         p1 = PreferenceModel('u2', 'i2', False, t2)
         result = preference_service.record_preference([p0, p1])
-        self.assertEqual(result, [p0, p1])
+
+        self.assertTrue(isinstance(result, list))
+
+        self.assertTrue(isinstance(result[0], PreferenceModel))
+        self.assertEqual(result[0].user_id, 'u1')
+        self.assertEqual(result[0].item_id, 'i1')
+        self.assertEqual(result[0].pref, True)
+        self.assertEqual(result[0].timestamp, t1)
+
+        self.assertTrue(isinstance(result[1], PreferenceModel))
+        self.assertEqual(result[1].user_id, 'u2')
+        self.assertEqual(result[1].item_id, 'i2')
+        self.assertEqual(result[1].pref, False)
+        self.assertEqual(result[1].timestamp, t1)
 
 
 class TestGenerateAssociationRules(PreferenceServiceTestsBase):
