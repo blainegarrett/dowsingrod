@@ -3,12 +3,16 @@ from rest_core.resources import Resource
 from rest_core.resources import RestField
 from rest_core.resources import BooleanField
 from rest_core.resources import DatetimeField
+from rest_core.resources import ResourceUrlField
+from rest_core.resources import ResourceIdField
+
 from services import preference_service
 from models import PreferenceModel
 
+resource_url = '/api/rest/preferences/%s'
 PREFERENCE_FIELDS = [
-    # ResourceIdField(output_only=True),
-    # ResourceUrlField(resource_url, output_only=True),
+    ResourceIdField(output_only=True),
+    ResourceUrlField(resource_url, output_only=True),
     RestField(PreferenceModel.user_id, required=True),
     RestField(PreferenceModel.item_id, required=True),
     BooleanField(PreferenceModel.pref, required=True),

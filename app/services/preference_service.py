@@ -1,5 +1,7 @@
 """
 Preference Service
+
+Please keep the service layer agnostic to persistance layer (api) or communication layer (handlers)
 """
 
 from api import preference_api
@@ -9,6 +11,9 @@ from api import mining_api
 def record_preference(preference_models):
     """"
     Method to persist a preference or list of preferences
+
+    Note: If a single PreferenceModel instance is given, returns a single
+        PreferenceModel instance
     """
 
     is_single = False
@@ -39,11 +44,7 @@ def generate_association_rules(min_support, min_confidence):
 
 def query_preferences(*args, **kwargs):
     """
-    Query for a set of preferences - mostly used for debugging
-
-    TODO: This is currently returning ndb models from the api
+    Query for a set of preferences models
     """
 
-    return preference_api.query_preference_entities(*args, **kwargs)
-    # TODO: THIS NEEDS UNIT TESTS, ETC
-
+    return preference_api.query_preference_models(*args, **kwargs)

@@ -1,3 +1,4 @@
+from mock import patch
 from tests import BaseCase
 from services import preference_service
 from models import PreferenceModel
@@ -8,7 +9,7 @@ class PreferenceServiceTestsBase(BaseCase):
     pass
 
 
-class RecprdPreferenceTests(PreferenceServiceTestsBase):
+class RecordPreferenceTests(PreferenceServiceTestsBase):
     def test_multiple(self):
         t1 = None  # TODO: Miliseconds
         t2 = None  # TODO: Miliseconds
@@ -31,16 +32,25 @@ class RecprdPreferenceTests(PreferenceServiceTestsBase):
         self.assertEqual(result[1].pref, False)
         self.assertEqual(result[1].timestamp, t1)
 
+    def test_single(self):
+        t1 = None  # TODO: Miliseconds
+
+        p0 = PreferenceModel('u1', 'i1', True, t1)
+        result = preference_service.record_preference(p0)
+
+        self.assertTrue(isinstance(result, PreferenceModel))
+        self.assertEqual(result.user_id, 'u1')
+        self.assertEqual(result.item_id, 'i1')
+        self.assertEqual(result.pref, True)
+        self.assertEqual(result.timestamp, t1)
+
 
 class TestGenerateAssociationRules(PreferenceServiceTestsBase):
+
     def setUp(self):
         super(TestGenerateAssociationRules, self).setUp()
 
     def test_base(self):
-        """
-        TODO: This acts as an integration test
-        """
-
         u = 0
         models_to_put = []
         for txn in dataset.data2:
@@ -54,5 +64,18 @@ class TestGenerateAssociationRules(PreferenceServiceTestsBase):
 
         result = preference_service.generate_association_rules(min_support, min_confidence)
 
-        for r in result:
-            print r
+        self.assertEqual(len(result), 31)
+        self.assertEqual(result[0].ant, [u'Butter:1'])
+        self.assertEqual(result[0].con, [u'Peanut Butter:1'])
+        self.assertEqual(result[0].confidence, 1.0)
+
+
+class QueryPreferencesTests(PreferenceServiceTestsBase):
+    @patch('api.preference_api.query_preference_models')
+    def test_base(self, mock_api):
+        """
+        This test exists just for coverage. Revisit once we add full support
+        """
+        result = preference_service.query_preferences('arg', some='kwarg')
+        self.assertEquals(result, mock_api.return_value)
+        mock_api.assert_called_once_with('arg', some='kwarg')

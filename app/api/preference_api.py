@@ -1,9 +1,11 @@
 """
 Low level API surrounding preferences persistance
+Keep all persistance implementation in this layer and return models to service layer
 """
 from google.appengine.ext import ndb
 from api.entities import PreferenceEntity
 from models import PreferenceModel
+from rest_core.utils import get_resource_id_from_key
 
 
 def create(model):
@@ -13,13 +15,15 @@ def create(model):
     e = _populate_entity(model)
     e.put()
 
-    model.synced_timestamp = e.synced_timestamp
+    # Hydrate model to return to service layer
+    model = _populate_model(e)
     return model
 
 
 def create_multi(models):
     """
     Persist a list of preference models
+    Note: This is not currently transactional and doesn't batch puts()
     """
 
     # Convert all models into entities
@@ -28,9 +32,9 @@ def create_multi(models):
         entities_to_put.append(_populate_entity(model))
 
     # Bulk persist entities
-    # entity_keys = ndb.put_multi(entities_to_put)
     ndb.put_multi(entities_to_put)
 
+    # Hydrate models to return to service layer
     return_models = []
     for e in entities_to_put:
         return_models.append(_populate_model(e))
@@ -43,36 +47,48 @@ def _populate_model(entity):
     Populate a model from an ndb entity
     """
 
-    # TODO: If we support a key, use it
     m = PreferenceModel(entity.user_id, entity.item_id, entity.pref, entity.timestamp)
     m.synced_timestamp = entity.synced_timestamp
+    m.id = get_resource_id_from_key(entity.key)
     return m
 
 
 def _populate_entity(model):
     """
     Populate a ndb entity from a model
+    TODO: This doesn't currently support setting key on create
     """
-
-    # TODO: If we support a key, use it
-
     data = {'user_id': model.user_id,
             'item_id': model.item_id,
             'pref': model.pref,
             'timestamp': model.timestamp
             }
 
-    e = PreferenceEntity(**data)
-
-    return e
+    return PreferenceEntity(**data)
 
 
-def query_preference_entities():
+def query_preference_models(*args, **kwargs):
+    """
+    Query for a set of collection models
+    TODO: Needs pagination, search terms, etc
+    """
+    entities = _query_preference_entities(*args, **kwargs)
+
+    # Hydrate models to return to service layer
+    models = []
+    for e in entities:
+        models.append(_populate_model(e))
+
+    return models
+
+
+def _query_preference_entities(*args, **kwargs):
     """
     Query for preference entities
     """
     # TODO: Beef this up quite a bit
     # TODO: Conditionally case to Models...
+    # TODO: This doesn't currently have unit tests around it
     return PreferenceEntity.query().fetch(1000)
 
 
@@ -80,13 +96,13 @@ def get_txn_data():
     """
     Query for all preferences and group into transaction list format
 
-    {'session_id': ['Peanut Butter', 'Beer', 'Jelly', Bread']}
+    {'session_id': ['Peanut Butter:0', 'Beer:1', 'Jelly:1', Bread:2']}
     """
 
     txn_sets_map = {}
 
     # Fetch data iterator for preference entities
-    preference_entities = query_preference_entities()
+    preference_entities = _query_preference_entities()
 
     for pref in preference_entities:
         if pref.user_id not in txn_sets_map:
