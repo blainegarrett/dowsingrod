@@ -18,15 +18,19 @@ def handle_404(request, response, exception):
 
 # Define routes - currently this is only the written RSS feed
 web_routes = [
-    RedirectRoute('/api/rest/recommendations',
+    RedirectRoute('/api/rest/v1.0/recommendations',
                   'handlers.rest.recommendation_handlers.RecommendationsHandler',
                   strict_slash=True,
                   name="RecommendationsHandler"),
-    RedirectRoute('/api/rest/preferences/<resource_id:\w+>',
+    RedirectRoute('/api/rest/v1.0/preferences/list',
+                  'handlers.rest.preference_handlers.PreferenceListHandler',
+                  strict_slash=True,
+                  name="PreferenceCollectionHandler"),
+    RedirectRoute('/api/rest/v1.0/preferences/<resource_id:\w+>',
                   'handlers.rest.preference_handlers.PreferenceDetailHandler',
                   strict_slash=True,
                   name="PreferenceDetailHandler"),
-    RedirectRoute('/api/rest/preferences',
+    RedirectRoute('/api/rest/v1.0/preferences',
                   'handlers.rest.preference_handlers.PreferenceCollectionHandler',
                   strict_slash=True,
                   name="PreferenceCollectionHandler"),

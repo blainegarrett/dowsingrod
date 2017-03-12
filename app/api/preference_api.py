@@ -8,12 +8,14 @@ from models import PreferenceModel
 from rest_core.utils import get_resource_id_from_key, get_key_from_resource_id
 
 
-def get_by_id(id):
-    try:
-        key = get_key_from_resource_id(id)
-        return key.get()
-    except (TypeError, ValueError):
+def get_model_by_id(id):
+    """
+    Get a domain model by id
+    """
+    e = _get_by_id(id)
+    if not e:
         return None
+    return _populate_model(e)
 
 
 def create(model):
@@ -50,6 +52,14 @@ def create_multi(models):
     return return_models
 
 
+def _get_by_id(id):
+    try:
+        key = get_key_from_resource_id(id)
+        return key.get()
+    except (TypeError, ValueError):
+        return None
+
+
 def _populate_model(entity):
     """
     Populate a model from an ndb entity
@@ -69,8 +79,11 @@ def _populate_entity(model):
     data = {'user_id': model.user_id,
             'item_id': model.item_id,
             'pref': model.pref,
-            'timestamp': model.timestamp
             }
+
+    # NDB Models are expected to be in timezone unaware format - implicit UTC
+    if model.timestamp:
+        data['timestamp'] = model.timestamp.replace(tzinfo=None)
 
     return PreferenceEntity(**data)
 

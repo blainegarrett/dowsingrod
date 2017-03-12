@@ -10,7 +10,21 @@ from rest_core.errors import DoesNotExistException
 from services import preference_service
 from models import PreferenceModel
 
-resource_url = '/api/rest/preferences/%s'
+
+class ResourceListField(RestField):
+    def __init__(self, fields, **kwargs):
+        self.fields = fields
+        # self.resource_rules = resource_rules
+        super(ResourceListField, self).__init__('resources', **kwargs)
+
+    def from_resource(self, obj, field):
+
+        raise Exception("here...")
+        val = super(ResourceListField, self).from_resource(obj, field)
+
+        return val
+
+resource_url = '/api/rest/v1.0/preferences/%s'
 PREFERENCE_FIELDS = [
     ResourceIdField(output_only=True),
     ResourceUrlField(resource_url, output_only=True),
@@ -35,6 +49,8 @@ class PreferenceBaseHandler(handlers.RestHandlerBase):
         Fetch a model by given id OR implicitly raise a 404
         """
         m = preference_service.get_by_id(resource_id)
+
+        raise Exception(m)
         if not m:
             err = 'Preference with resource_id \'%s\' not found'
             raise DoesNotExistException(err % resource_id)
@@ -59,6 +75,8 @@ class PreferenceCollectionHandler(PreferenceBaseHandler):
     """
     Handler for a collection of Preferences
     """
+    def get_rules(self):
+        return [ResourceListField(fields=PREFERENCE_FIELDS)]
 
     def get(self):
         models = preference_service.query_preferences()
@@ -67,15 +85,29 @@ class PreferenceCollectionHandler(PreferenceBaseHandler):
             return_resources.append(self.model_to_rest_resource(pref_model, True))
         self.serve_success(return_resources)
 
-    def post(self):
+    def validate_payload(self):  # aka Form.clean
         """
-        Create a single Preference entity
+        Validate the request payload against the rest rules
+        This only works for a single payload entity, not a list...
         """
 
-        model = PreferenceModel(self.cleaned_data.get('user_id'),
-                                self.cleaned_data.get('item_id'),
-                                self.cleaned_data.get('pref'),
-                                self.cleaned_data.get('timestamp'))
-        model = preference_service.record_preference(model)
-        self.serve_success(self.model_to_rest_resource(model, True))
-        return
+        # rules = self.get_rules()
+
+        self.cleaned_data = []
+        for d in self.data:
+            self.cleaned_data.append(Resource(None, PREFERENCE_FIELDS).from_dict(d))
+
+    def post(self):
+        models = []
+        return_resources = []
+        for d in self.cleaned_data:
+            model = PreferenceModel(d.get('user_id'),
+                                    d.get('item_id'),
+                                    d.get('pref'),
+                                    d.get('timestamp'))
+            models.append(model)
+
+        models = preference_service.record_preference(models)
+        for pref_model in models:
+            return_resources.append(self.model_to_rest_resource(pref_model, True))
+        self.serve_success(return_resources)

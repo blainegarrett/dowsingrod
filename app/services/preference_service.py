@@ -9,7 +9,7 @@ from api import mining_api
 
 
 def get_by_id(id):
-    return preference_api.get_by_id(id)
+    return preference_api.get_model_by_id(id)
 
 
 def record_preference(preference_models):
