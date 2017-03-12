@@ -2,6 +2,12 @@
 Server API for "dowsingrod project"
 
 
+#Installing
+
+ls $GAE_PYTHONPATH
+echo $GAE_PYTHONPATH
+
+
 # TODOS:
 
 

@@ -5,7 +5,15 @@ Keep all persistance implementation in this layer and return models to service l
 from google.appengine.ext import ndb
 from api.entities import PreferenceEntity
 from models import PreferenceModel
-from rest_core.utils import get_resource_id_from_key
+from rest_core.utils import get_resource_id_from_key, get_key_from_resource_id
+
+
+def get_by_id(id):
+    try:
+        key = get_key_from_resource_id(id)
+        return key.get()
+    except (TypeError, ValueError):
+        return None
 
 
 def create(model):

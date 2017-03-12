@@ -8,6 +8,10 @@ from api import preference_api
 from api import mining_api
 
 
+def get_by_id(id):
+    return preference_api.get_by_id(id)
+
+
 def record_preference(preference_models):
     """"
     Method to persist a preference or list of preferences

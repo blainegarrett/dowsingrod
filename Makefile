@@ -24,7 +24,7 @@ ifeq ($(filter-out $@,$(MAKECMDGOALS)), "")
 else
 	@echo "Running only tests in $(filter-out $@,$(MAKECMDGOALS))"
 endif
-	nosetests -sv -a is_unit --with-gae --gae-application=app --with-yanc $(filter-out $@,$(MAKECMDGOALS))
+	nosetests -sv -a is_unit --with-gae --gae-application=app  --gae-lib-root=$(GAE_PYTHONPATH) --with-yanc $(filter-out $@,$(MAKECMDGOALS))
 
 integrations:
 ifeq ($(filter-out $@,$(MAKECMDGOALS)), "")

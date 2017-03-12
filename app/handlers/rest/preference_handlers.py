@@ -5,6 +5,7 @@ from rest_core.resources import BooleanField
 from rest_core.resources import DatetimeField
 from rest_core.resources import ResourceUrlField
 from rest_core.resources import ResourceIdField
+from rest_core.errors import DoesNotExistException
 
 from services import preference_service
 from models import PreferenceModel
@@ -16,7 +17,7 @@ PREFERENCE_FIELDS = [
     RestField(PreferenceModel.user_id, required=True),
     RestField(PreferenceModel.item_id, required=True),
     BooleanField(PreferenceModel.pref, required=True),
-    DatetimeField(PreferenceModel.timestamp),
+    DatetimeField(PreferenceModel.timestamp, required=False),
     DatetimeField(PreferenceModel.synced_timestamp, output_only=True),
 ]
 
@@ -31,9 +32,13 @@ class PreferenceBaseHandler(handlers.RestHandlerBase):
 
     def get_model_by_id_or_error(self, resource_id):
         """
+        Fetch a model by given id OR implicitly raise a 404
         """
-
-        return 'DEREERERE'
+        m = preference_service.get_by_id(resource_id)
+        if not m:
+            err = 'Preference with resource_id \'%s\' not found'
+            raise DoesNotExistException(err % resource_id)
+        return m
 
     def model_to_rest_resource(self, model, verbose=False):
         """Convert a PreferenceModel to a Rest Resource (dict)"""
@@ -71,6 +76,6 @@ class PreferenceCollectionHandler(PreferenceBaseHandler):
                                 self.cleaned_data.get('item_id'),
                                 self.cleaned_data.get('pref'),
                                 self.cleaned_data.get('timestamp'))
-        model = preference_service.record_preference(model)  # TODO: This returns a list atm
+        model = preference_service.record_preference(model)
         self.serve_success(self.model_to_rest_resource(model, True))
         return
