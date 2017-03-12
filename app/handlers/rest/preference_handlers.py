@@ -10,20 +10,6 @@ from rest_core.errors import DoesNotExistException
 from services import preference_service
 from models import PreferenceModel
 
-
-class ResourceListField(RestField):
-    def __init__(self, fields, **kwargs):
-        self.fields = fields
-        # self.resource_rules = resource_rules
-        super(ResourceListField, self).__init__('resources', **kwargs)
-
-    def from_resource(self, obj, field):
-
-        raise Exception("here...")
-        val = super(ResourceListField, self).from_resource(obj, field)
-
-        return val
-
 resource_url = '/api/rest/v1.0/preferences/%s'
 PREFERENCE_FIELDS = [
     ResourceIdField(output_only=True),
@@ -50,7 +36,6 @@ class PreferenceBaseHandler(handlers.RestHandlerBase):
         """
         m = preference_service.get_by_id(resource_id)
 
-        raise Exception(m)
         if not m:
             err = 'Preference with resource_id \'%s\' not found'
             raise DoesNotExistException(err % resource_id)
@@ -75,8 +60,6 @@ class PreferenceCollectionHandler(PreferenceBaseHandler):
     """
     Handler for a collection of Preferences
     """
-    def get_rules(self):
-        return [ResourceListField(fields=PREFERENCE_FIELDS)]
 
     def get(self):
         models = preference_service.query_preferences()
