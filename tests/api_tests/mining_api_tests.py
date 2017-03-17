@@ -1,4 +1,5 @@
 # from mock import patch
+import datetime
 from mock import patch
 from tests import BaseCase
 from api import mining_api
@@ -34,6 +35,19 @@ class QueryRuleSetEntitiesTests(MiningTestsBase):
         self.assertTrue(isinstance(result[1], mining_api.AssociationRuleEntity))
 '''
 
+
+class CreateRulesetTests(MiningTestsBase):
+
+    @patch('api.mining_api.get_resource_id_from_key', return_value='mocked_id')
+    def test_base(self, m_get_id):
+        result = mining_api.create_ruleset(.4, .7)
+
+        self.assertTrue(isinstance(result, mining_api.AssociationRuleSetModel))
+        self.assertEqual(result.min_confidence, .7)
+        self.assertEqual(result.min_support, .4)
+        self.assertEqual(result.total_rules, None)
+        self.assertTrue(isinstance(result.created_timestamp, datetime.datetime))
+        self.assertEqual(result.id, 'mocked_id')
 
 # Association Rule Tests
 

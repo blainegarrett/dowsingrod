@@ -40,7 +40,7 @@ class AssociationRuleSetModel(Model):
     total_rules = ndb.IntegerProperty()
     created_timestamp = ndb.DateTimeProperty()
 
-    def __init__(self, min_confidence, min_support):
+    def __init__(self, min_support, min_confidence):
         super(Model, self).__init__()
 
         self.min_confidence = min_confidence

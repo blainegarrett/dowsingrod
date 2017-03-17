@@ -5,7 +5,6 @@ Please keep the service layer agnostic to persistance layer (api) or communicati
 """
 
 from api import preference_api
-from api import mining_api
 
 
 def get_by_id(id):
