@@ -15,7 +15,15 @@ from rest_core.utils import get_resource_id_from_key  # , get_key_from_resource_
 
 # Association RuleSets
 
-'''
+
+def _query_ruleset_entities(*args, **kwargs):
+    # TODO: Add support for filters, etc
+
+    q = AssociationRuleSetEntity.query()
+    q = q.order(-AssociationRuleSetEntity.created_timestamp)
+    return q.fetch(1000)
+
+
 def query_ruleset_models(*args, **kwargs):
     """
     Query for a set of AssociationRuleSet Models
@@ -26,10 +34,8 @@ def query_ruleset_models(*args, **kwargs):
     # Hydrate models to return to service layer
     models = []
     for e in entities:
-        models.append(_populate_rulesetmodel(e))
-
+        models.append(_populate_ruleset_model(e))
     return models
-'''
 
 
 def _populate_ruleset_model(entity):
@@ -74,7 +80,14 @@ def _query_rule_entities(*args, **kwargs):
     # TODO: Beef this up quite a bit
     # TODO: Conditionally case to Models...
     # TODO: This doesn't currently have unit tests around it
-    return AssociationRuleEntity.query().fetch(1000)
+
+    q = AssociationRuleEntity.query()
+    if (kwargs.get('ruleset_id', None)):
+        q = q.filter(AssociationRuleEntity.ruleset_id == kwargs.get('ruleset_id'))
+
+    # Sorting
+    entities = q.fetch(1000)
+    return entities
 
 
 def create_rule(ruleset_id, model):

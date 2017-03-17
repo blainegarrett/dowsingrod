@@ -2,11 +2,15 @@ from api import mining_api
 from api import preference_api
 
 
-def query_rules():
+def query_rules(*args, **kwargs):
     """
     TODO: Support filters, paginations, etc
     """
-    return mining_api.query_rule_models()
+    return mining_api.query_rule_models(*args, **kwargs)
+
+
+def query_rule_sets():
+    return mining_api.query_ruleset_models()
 
 
 def delete_rules():

@@ -11,8 +11,6 @@ from models import PreferenceModel
 from models import AssociationRuleModel
 from models import AssociationRuleSetModel
 
-from api.entities import AssociationRuleSetEntity
-
 from services import rule_service
 from services import preference_service
 from handlers.rest import dataset
@@ -24,14 +22,14 @@ DEFAULT_MIN_CONFIDENCE = .5
 
 ASSOCIATION_RULES_FIELDS = [
     ResourceIdField(output_only=True),
-    ResourceUrlField('/api/rest/v1.0/recommendation/%s', output_only=True),
+    ResourceUrlField('/api/rest/v1.0/recommendations/%s', output_only=True),
     RestField(AssociationRuleModel.ant, required=False),
     RestField(AssociationRuleModel.con, required=False),
     RestField(AssociationRuleModel.confidence, required=True),
     RestField(AssociationRuleModel.rule_key, output_only=True),
 ]
 
-resource_url = '/api/rest/v1.0/recommendation/%s'
+resource_url = '/api/rest/v1.0/rulesets/%s'
 ASSOCIATION_RULE_SET_FIELDS = [
     ResourceIdField(output_only=True),
     ResourceUrlField('/api/rest/v1.0/recommendation/%s', output_only=True),
@@ -87,14 +85,14 @@ class RuleSetCollectionHandler(RuleSetHandler):
         # TODO: MOVE TO API LEVEL
 
         return_resources = []
-        models = AssociationRuleSetEntity.query().fetch(1000)
+        models = rule_service.query_rule_sets()
         for model in models:
             return_resources.append(self.model_to_rest_resource(model, True))
         self.serve_success(return_resources)
 
 
 # Association Rules
-class RecommendationsHandler(handlers.RestHandlerBase):
+class RecommendationsHandlerBase(handlers.RestHandlerBase):
     """
     Base Handler for Non-api calls
     """
@@ -106,15 +104,16 @@ class RecommendationsHandler(handlers.RestHandlerBase):
         return Resource(model, ASSOCIATION_RULES_FIELDS).to_dict(verbose)
 
 
-class RecommendationCollectionHandler(RecommendationsHandler):
+class RecommendationCollectionHandler(RecommendationsHandlerBase):
     """
     """
 
-    def get(self):  # TODO: Switch to post or put
+    def get(self):
         """
-        Retrieve a set of rules
+        Retrieve a set of rules based on the latest generated AssociationRuleSet
         """
-        models = rule_service.query_rules()
+        ruleset = rule_service.query_rule_sets()[0]
+        models = rule_service.query_rules(ruleset_id=ruleset.id)
         return_resources = []
         for model in models:
             return_resources.append(self.model_to_rest_resource(model, True))
@@ -149,19 +148,6 @@ class SyncHandler(handlers.RestHandlerBase):
                 models_to_put.append(PreferenceModel("user%s" % u, txn_item, True))
         preference_service.record_preference(models_to_put)
         self.serve_success('now run a POST')
-
-    def post(self):
-        """
-        Generate Rules
-        """
-        min_support = self.cleaned_params.get('min_support', DEFAULT_MIN_SUPPORT)
-        min_confidence = self.cleaned_params.get('min_confidence', DEFAULT_MIN_CONFIDENCE)
-
-        models = rule_service.generate_association_rules(min_confidence, min_support)
-        return_resources = []
-        for model in models:
-            return_resources.append(self.model_to_rest_resource(model, True))
-        self.serve_success(return_resources)
 
     def delete(self):
         """

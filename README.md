@@ -56,8 +56,41 @@ resource_url | string | *output only* | restful url to resource
         }
 ```
 
+
+### AssociationRuleSet Resource Object
+A resource representing a run the ruleset generation based on the PreferenceModels at the time it was run.
+
+
+Name | Type | Note | Description
+------------ | -------------
+min_confidence | float | *optional* | min confidence used to prune rule set is persisted - defaults to .5
+min_support | float | *optional* | min support used to prune rule set that is persisted - defaults to .5
+created_timestamp | ISO Datestamp | *required* | Timestamp of when Ruleset was generated
+total_rules | int | *required* | Confidence the rule is correct in the range of [0...1]
+resource_id | string | *output only* | resource_id for this `AssociationRuleSet`
+resource_type | string | *output only* | always `AssociationRuleSet`
+resource_url | string | *output only* | restful url to resource
+
+#### Example Output
+```
+        {
+            "_meta": {
+                "is_verbose": true,
+                "resource_type": "AssociationRuleSetEntity"
+            },
+            "created_timestamp": "2017-03-17T04:50:45Z",
+            "min_confidence": 0.345,
+            "min_support": 0.45,
+            "resource_id": "QXNzb2NpYXRpb25SdWxlU2V0RW50aXR5Hh81Nzk5MjM2NjQxNzUxMDQw",
+            "resource_type": "AssociationRuleSetEntity",
+            "resource_url": "/api/rest/v1.0/recommendation/QXNzb2NpYXRpb25SdWxlU2V0RW50aXR5Hh81Nzk5MjM2NjQxNzUxMDQw",
+            "total_rules": 12
+        }
+```
+
+
 ### AssociationRule Resource Object
-Below is the input and output representation of a `AssociationRule`. Note for `ant` and `con`, the values of the arrays are `rule_item_key` which is in the format of "<item_id>:<0 or 1>" representing a "like" or "dislike" for item designated by `item_id`
+Below is the input and output representation of a `AssociationRule`. Note for `ant` and `con`, the values of the arrays are `rule_item_key` which is in the format of "item id:0 or 1" representing a "like" or "dislike" for item designated by `item_id`
 
 
 Name | Type | Note | Description
@@ -218,9 +251,9 @@ The body of a POST request must be an JSON encoded array of `PreferenceModel` ob
 
 
 
-### Generate Rules
+### Generate a new RuleSet
 ```
-POST /api/rest/v1.0/sync
+POST /api/rest/v1.0/rulesets
 ```
 #### JSON Body
 No body is allowed
@@ -248,23 +281,47 @@ The response body results are a list of `AssociationRule Resource Object`
     "messages": [
         null
     ],
+    "results": {
+        "_meta": {
+            "is_verbose": true,
+            "resource_type": "AssociationRuleSetModel"
+        },
+        "created_timestamp": "2017-03-17T15:54:45Z",
+        "min_confidence": 0.345,
+        "min_support": 0.45,
+        "resource_id": "QXNzb2NpYXRpb25SdWxlU2V0RW50aXR5Hh81NjA2ODIyMTA2ODkwMjQw",
+        "resource_type": "AssociationRuleSetModel",
+        "resource_url": "/api/rest/v1.0/rulesets/QXNzb2NpYXRpb25SdWxlU2V0RW50aXR5Hh81NjA2ODIyMTA2ODkwMjQw",
+        "total_rules": 12
+    },
+    "status": 200
+}
+```
+
+### List Rulesets
+```
+GET /api/rest/v1.0/rulesets
+```
+
+#### Response Body
+```
+{
+    "messages": [
+        null
+    ],
     "results": [
         {
             "_meta": {
                 "is_verbose": true,
-                "resource_type": "AssociationRuleModel"
+                "resource_type": "AssociationRuleSetModel"
             },
-            "ant": [
-                "Bread:1"
-            ],
-            "con": [
-                "Jelly:1"
-            ],
-            "confidence": 0.7474747474747475,
-            "resource_id": "QXNzb2NpYXRpb25SdWxlRW50aXR5Hh82NTIwNzkxMTQ3NDc5MDQw",
-            "resource_type": "AssociationRuleModel",
-            "resource_url": "/api/rest/v1.0/recommendation/QXNzb2NpYXRpb25SdWxlRW50aXR5Hh82NTIwNzkxMTQ3NDc5MDQw",
-            "rule_key": "bread:1"
+            "created_timestamp": "2017-03-17T04:50:45Z",
+            "min_confidence": 0.345,
+            "min_support": 0.45,
+            "resource_id": "QXNzb2NpYXRpb25SdWxlU2V0RW50aXR5Hh81Nzk5MjM2NjQxNzUxMDQw",
+            "resource_type": "AssociationRuleSetModel",
+            "resource_url": "/api/rest/v1.0/rulesets/QXNzb2NpYXRpb25SdWxlU2V0RW50aXR5Hh81Nzk5MjM2NjQxNzUxMDQw",
+            "total_rules": null
         },
         ...
     ],
@@ -281,7 +338,7 @@ Deletes all the association rules
 
 
 
-### Get Reccomendations - get Latest Association Rules
+### Get Reccomendations - get Latest Association Rules (by RuleSets' max create_date)
 ```
 GET /api/rest/v1.0/recommendation
 ```
