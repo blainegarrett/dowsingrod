@@ -2,7 +2,6 @@ from mock import patch
 from tests import BaseCase
 from services import preference_service
 from models import PreferenceModel
-from tests import dataset
 
 
 class PreferenceServiceTestsBase(BaseCase):
@@ -43,31 +42,6 @@ class RecordPreferenceTests(PreferenceServiceTestsBase):
         self.assertEqual(result.item_id, 'i1')
         self.assertEqual(result.pref, True)
         self.assertEqual(result.timestamp, t1)
-
-
-class TestGenerateAssociationRules(PreferenceServiceTestsBase):
-
-    def setUp(self):
-        super(TestGenerateAssociationRules, self).setUp()
-
-    def test_base(self):
-        u = 0
-        models_to_put = []
-        for txn in dataset.data2:
-            u += 1
-            for txn_item in txn:
-                models_to_put.append(PreferenceModel("user%s" % u, txn_item, True))
-        preference_service.record_preference(models_to_put)
-
-        min_support = .2
-        min_confidence = .7
-
-        result = preference_service.generate_association_rules(min_support, min_confidence)
-
-        self.assertEqual(len(result), 31)
-        self.assertEqual(result[0].ant, [u'Butter:1'])
-        self.assertEqual(result[0].con, [u'Peanut Butter:1'])
-        self.assertEqual(result[0].confidence, 1.0)
 
 
 class QueryPreferencesTests(PreferenceServiceTestsBase):

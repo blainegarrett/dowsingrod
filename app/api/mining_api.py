@@ -32,6 +32,24 @@ def query_ruleset_models(*args, **kwargs):
 '''
 
 
+def _populate_ruleset_model(entity):
+    m = AssociationRuleSetModel(entity.min_support, entity.min_confidence)
+    m.created_timestamp = entity.created_timestamp
+    m.total_rules = entity.total_rules
+    m.id = get_resource_id_from_key(entity.key)
+    return m
+
+
+def create_ruleset(min_support, min_confidence):
+    # TODO: Move to api layer
+    e = AssociationRuleSetEntity()
+    e.min_support = min_support
+    e.min_confidence = min_confidence
+    e.put()
+
+    return _populate_ruleset_model(e)
+
+
 # Association rules
 
 def query_rule_models(*args, **kwargs):
@@ -59,12 +77,13 @@ def _query_rule_entities(*args, **kwargs):
     return AssociationRuleEntity.query().fetch(1000)
 
 
-def create_rule(model):
+def create_rule(ruleset_id, model):
     """
     Persist a single association rule
     """
 
     e = _populate_rule_entity(model)
+    e.ruleset_id = ruleset_id
     e.put()
 
     # Hydrate model to return to service layer
@@ -72,7 +91,7 @@ def create_rule(model):
     return model
 
 
-def create_rules(models):
+def create_rules(ruleset_id, models):
     """
     Persist a list of association rules
     """
@@ -80,7 +99,9 @@ def create_rules(models):
     # Convert all models into entities
     entities_to_put = []
     for model in models:
-        entities_to_put.append(_populate_rule_entity(model))
+        e = _populate_rule_entity(model)
+        e.ruleset_id = ruleset_id
+        entities_to_put.append(e)
 
     # Bulk persist entities
     # entity_keys = ndb.put_multi(entities_to_put)
@@ -153,6 +174,7 @@ def _print_items_and_rules(items, rule_entities):
 def _populate_rule_model(entity):
     m = AssociationRuleModel(entity.ant, entity.con, entity.confidence)
     m.id = get_resource_id_from_key(entity.key)
+    m.ruleset_id = entity.ruleset_id
     return m
 
 

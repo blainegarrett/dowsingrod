@@ -16,8 +16,16 @@ def handle_404(request, response, exception):
     response.write("Not found")
     response.set_status(404)
 
+
+
+
 # Define routes - currently this is only the written RSS feed
 web_routes = [
+    RedirectRoute('/api/rest/v1.0/rulesets',
+                  'handlers.rest.recommendation_handlers.RuleSetCollectionHandler',
+                  strict_slash=True,
+                  name="RuleSetCollectionHandler"),
+
     RedirectRoute('/api/rest/v1.0/recommendations',
                   'handlers.rest.recommendation_handlers.RecommendationsHandler',
                   strict_slash=True,
@@ -26,6 +34,8 @@ web_routes = [
                   'handlers.rest.preference_handlers.PreferenceListHandler',
                   strict_slash=True,
                   name="PreferenceCollectionHandler"),
+
+
     RedirectRoute('/api/rest/v1.0/preferences/<resource_id:\w+>',
                   'handlers.rest.preference_handlers.PreferenceDetailHandler',
                   strict_slash=True,

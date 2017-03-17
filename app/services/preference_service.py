@@ -33,20 +33,6 @@ def record_preference(preference_models):
     return preference_models
 
 
-def generate_association_rules(min_support, min_confidence):
-    """
-    Process to generate association rules
-    """
-    # TODO: This probably needs to be split up into separate async functions
-    # TODO: This probably needs to be moved to rule_service
-
-    txn_data = preference_api.get_txn_data()
-    _, rule_models = mining_api.run_apriori(txn_data, min_support, min_confidence)
-    rule_models = mining_api.create_rules(rule_models)
-
-    return rule_models
-
-
 def query_preferences(*args, **kwargs):
     """
     Query for a set of preferences models

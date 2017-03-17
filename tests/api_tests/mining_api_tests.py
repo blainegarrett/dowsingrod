@@ -23,7 +23,7 @@ class QueryRuleSetEntitiesTests(MiningTestsBase):
                                              ['Steak:1'],
                                              .25)
 
-        mining_api.create_rules([m1, m2])
+        mining_api.create_rules('ruleset_id', [m1, m2])
 
     def test_no_params(self):
         raise Exception('not yet')
@@ -34,7 +34,10 @@ class QueryRuleSetEntitiesTests(MiningTestsBase):
         self.assertTrue(isinstance(result[1], mining_api.AssociationRuleEntity))
 '''
 
+
 # Association Rule Tests
+
+
 class RuleModelTests(MiningTestsBase):
     def test_get_rule_item_id(self):
         """
@@ -63,7 +66,7 @@ class QueryRuleEntitiesTests(MiningTestsBase):
                                              ['Steak:1'],
                                              .25)
 
-        mining_api.create_rules([m1, m2])
+        mining_api.create_rules('ruleset_id', [m1, m2])
 
     def test_no_params(self):
         result = mining_api._query_rule_entities()
@@ -97,7 +100,7 @@ class CreateRuleTest(MiningTestsBase):
         con = ['Cheese:0']
 
         m = mining_api.AssociationRuleModel(ant, con, .85)
-        result = mining_api.create_rule(m)
+        result = mining_api.create_rule('ruleset_id', m)
 
         self.assertTrue(isinstance(result, mining_api.AssociationRuleModel))
         self.assertEqual(result.ant, ['Peanut Butter:1', 'Steak:0', 'Peanut Butter:0'])
@@ -105,6 +108,7 @@ class CreateRuleTest(MiningTestsBase):
         self.assertEqual(result.confidence, .85)
         self.assertEqual(result.rule_key, 'peanut_butter:0__peanut_butter:1__steak:0')
         self.assertEqual(result.id, 'mocked_id')
+        self.assertEqual(result.ruleset_id, 'ruleset_id')
 
 
 @patch('api.mining_api.get_resource_id_from_key', return_value='mocked_id')
@@ -116,7 +120,7 @@ class CreateMultiTest(MiningTestsBase):
 
         m1 = mining_api.AssociationRuleModel(ant, con, .85)
         m2 = mining_api.AssociationRuleModel(ant, con, .85)
-        result = mining_api.create_rules([m1, m2])
+        result = mining_api.create_rules('ruleset_id', [m1, m2])
 
         self.assertTrue(isinstance(result, list))
 
@@ -126,6 +130,7 @@ class CreateMultiTest(MiningTestsBase):
         self.assertEqual(result[0].confidence, .85)
         self.assertEqual(result[0].rule_key, 'peanut_butter:0__peanut_butter:1__steak:0')
         self.assertEquals(result[0].id, 'mocked_id')
+        self.assertEqual(result[0].ruleset_id, 'ruleset_id')
 
         self.assertEqual(m_get_id.call_count, 2)
 
@@ -137,7 +142,7 @@ class DeleteRulesTests(MiningTestsBase):
         m1 = mining_api.AssociationRuleModel(['Peanut Butter:1', 'Steak:0', 'Peanut Butter:0'],
                                              ['Cheese:0'],
                                              .25)
-        mining_api.create_rules([m1])
+        mining_api.create_rules('ruleset_id', [m1])
 
     def base_test(self):
 

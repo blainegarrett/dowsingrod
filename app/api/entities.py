@@ -22,6 +22,7 @@ class AssociationRuleEntity(ndb.Model):
     confidence = ndb.FloatProperty()  # range of [0, 1]
     created_timestamp = ndb.DateTimeProperty(auto_now_add=True)  # Timestamp when pref synced
     rule_key = ndb.StringProperty(indexed=True)  # Searchable/sortable key
+    ruleset_id = ndb.StringProperty()  # Resource_id of AssociationRuleSet
 
     def __repr__(self):
         return "Rule: %s ==> %s , %.3f" % (str(self.ant), str(self.con), self.confidence)
@@ -32,4 +33,4 @@ class AssociationRuleSetEntity(ndb.Model):
     min_confidence = ndb.FloatProperty()  # range of [0, 1]
     min_support = ndb.FloatProperty()  # range of [0, 1]
     total_rules = ndb.IntegerProperty()
-    created_time = ndb.DateTimeProperty(auto_now_add=True)
+    created_timestamp = ndb.DateTimeProperty(auto_now_add=True)

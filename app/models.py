@@ -38,14 +38,13 @@ class AssociationRuleSetModel(Model):
     min_confidence = ndb.FloatProperty()
     min_support = ndb.FloatProperty()
     total_rules = ndb.IntegerProperty()
-    created_time = ndb.DateTimeProperty()
+    created_timestamp = ndb.DateTimeProperty()
 
-    def __init__(self, min_confidence, min_support, total_rules):
+    def __init__(self, min_confidence, min_support):
         super(Model, self).__init__()
 
         self.min_confidence = min_confidence
         self.min_support = min_support
-        self.total_rules = total_rules
 
 
 class AssociationRuleModel(Model):
@@ -56,6 +55,7 @@ class AssociationRuleModel(Model):
     con = ndb.StringProperty(repeated=True)  # Consequent
     confidence = ndb.FloatProperty()  # range of [0, 1]
     rule_key = ndb.StringProperty()
+    ruleset_id = ndb.StringProperty()
 
     def __init__(self, ant, con, confidence):
         super(Model, self).__init__()
