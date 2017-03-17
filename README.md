@@ -19,7 +19,7 @@ Below is the input and output representation of a `PreferenceModel`
 
 
 Name | Type | Note | Description
------------- | -------------
+-----| ---- | -----| --------
 item_id | string | *required* | identifier of item preference is for
 user_id | string | *required* | identifier of user recording the preference, used for calculation "transaction" set
 pref | boolean | *required* | true or false of if the user liked or disliked the item
@@ -62,7 +62,7 @@ A resource representing a run the ruleset generation based on the PreferenceMode
 
 
 Name | Type | Note | Description
------------- | -------------
+-----|------|------|-------
 min_confidence | float | *optional* | min confidence used to prune rule set is persisted - defaults to .5
 min_support | float | *optional* | min support used to prune rule set that is persisted - defaults to .5
 created_timestamp | ISO Datestamp | *required* | Timestamp of when Ruleset was generated
@@ -94,7 +94,7 @@ Below is the input and output representation of a `AssociationRule`. Note for `a
 
 
 Name | Type | Note | Description
------------- | -------------
+-----|------|------|-------
 ant | array | *required* | Rule antecedant list of `rule_item_key` strings described above
 con | array | *required* | Rule consequent list of `rule_item_key` strings described above
 confidence | float | *required* | Confidence the rule is correct in the range of [0...1]
@@ -264,7 +264,7 @@ min_support
 
 
 Name | Type | Note | Description
------------- | -------------
+-----|------|------|-------
 min_confidence | float | *optional* | min confidence used to prune rule set is persisted - defaults to .5
 min_support | float | *optional* | min support used to prune rule set that is persisted - defaults to .5
 
