@@ -34,6 +34,18 @@ web_routes = [
                   'handlers.rest.preference_handlers.PreferenceCollectionHandler',
                   strict_slash=True,
                   name="PreferenceCollectionHandler"),
+
+    RedirectRoute('/api/rest/v1.0/recommendation',
+                  'handlers.rest.recommendation_handlers.RecommendationCollectionHandler',
+                  strict_slash=True,
+                  name="RecommendationCollectionHandler"),
+
+    RedirectRoute('/api/rest/v1.0/sync',
+                  'handlers.rest.recommendation_handlers.SyncHandler',
+                  strict_slash=True,
+                  name="SyncHandler"),
+
+
     ]
 app = webapp2.WSGIApplication(web_routes, debug=True)
 app.error_handlers[404] = handle_404

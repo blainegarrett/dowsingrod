@@ -2,7 +2,7 @@
 Description     : Simple Python implementation of the Apriori Algorithm
 """
 
-from models import AssociationRule
+from models import AssociationRuleModel
 
 from itertools import chain, combinations
 from collections import defaultdict
@@ -126,8 +126,8 @@ def printResults(items, rules):
     for item, support in sorted(items, key=lambda (item, support): support):
         print "item: %s , %.3f" % (str(item), support)
     print "\n------------------------ RULES:"
-    for rule, confidence in rules: #sorted(rules, key=lambda (rule, confidence): confidence):
+    for rule, confidence in rules:  # sorted(rules, key=lambda (rule, confidence): confidence):
         pre, post = rule
 
-        r = AssociationRule(pre, post, confidence)
+        r = AssociationRuleModel(pre, post, confidence)
         print r

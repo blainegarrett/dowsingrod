@@ -89,3 +89,4 @@ ENV/
 .ropeproject
 app/external
 data
+cover

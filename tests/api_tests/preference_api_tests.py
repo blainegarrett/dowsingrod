@@ -98,6 +98,21 @@ class QueryEntitiesTests(PreferenceTestsBase):
         self.assertTrue(isinstance(entities[1], preference_api.PreferenceEntity))
 
 
+class QueryModelsTests(PreferenceTestsBase):
+    @patch('api.preference_api._query_preference_entities')
+    @patch('api.preference_api._populate_model')
+    def test_base(self, mock_populate, mock_query):
+        # Setup Mocks
+        mock_query.return_value = ['a', 'b']
+
+        # Run Code To Test
+        result = preference_api.query_preference_models('arg', kwarg=True)
+
+        # Check results
+        self.assertEqual(result, [mock_populate.return_value, mock_populate.return_value])
+        mock_query.assert_called_once_with('arg', kwarg=True)
+
+
 class GetTxnDataTests(PreferenceTestsBase):
     def setUp(self):
 

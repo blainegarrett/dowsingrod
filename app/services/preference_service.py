@@ -38,6 +38,7 @@ def generate_association_rules(min_support, min_confidence):
     Process to generate association rules
     """
     # TODO: This probably needs to be split up into separate async functions
+    # TODO: This probably needs to be moved to rule_service
 
     txn_data = preference_api.get_txn_data()
     _, rule_models = mining_api.run_apriori(txn_data, min_support, min_confidence)

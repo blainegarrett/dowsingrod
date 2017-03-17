@@ -46,7 +46,7 @@ class RunAprioriTests(MiningTestsBase):
         # Check some expectations
         self.assertTrue(isinstance(rule_models, list))
         self.assertEqual(len(rule_models), 31)
-        self.assertEqual(rule_models[0].__class__, mining_api.AssociationRuleEntity)
+        self.assertEqual(rule_models[0].__class__, mining_api.AssociationRuleModel)
 
         # Check a couple key results results
         rule1 = rule_models[9]

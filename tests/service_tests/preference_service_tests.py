@@ -2,7 +2,7 @@ from mock import patch
 from tests import BaseCase
 from services import preference_service
 from models import PreferenceModel
-from thirdparty import dataset
+from tests import dataset
 
 
 class PreferenceServiceTestsBase(BaseCase):
@@ -79,3 +79,11 @@ class QueryPreferencesTests(PreferenceServiceTestsBase):
         result = preference_service.query_preferences('arg', some='kwarg')
         self.assertEquals(result, mock_api.return_value)
         mock_api.assert_called_once_with('arg', some='kwarg')
+
+
+class GetByIdTests(PreferenceServiceTestsBase):
+    @patch('api.preference_api.get_model_by_id')
+    def test_base(self, mock_api):
+        result = preference_service.get_by_id('some_id')
+        self.assertEquals(result, mock_api.return_value)
+        mock_api.assert_called_once_with('some_id')
