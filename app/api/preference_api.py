@@ -110,7 +110,14 @@ def _query_preference_entities(*args, **kwargs):
     # TODO: Beef this up quite a bit
     # TODO: Conditionally case to Models...
     # TODO: This doesn't currently have unit tests around it
-    return PreferenceEntity.query().fetch(1000)
+
+    q = PreferenceEntity.query()
+    if (kwargs.get('user_id', None)):
+        q = q.filter(PreferenceEntity.user_id == kwargs.get('user_id'))
+
+    # TODO: Sorting
+    entities = q.fetch(1000)
+    return entities
 
 
 def get_txn_data():

@@ -1,3 +1,4 @@
+import voluptuous
 from rest_core import handlers
 from rest_core.resources import Resource
 from rest_core.resources import RestField
@@ -62,7 +63,9 @@ class PreferenceCollectionHandler(PreferenceBaseHandler):
     """
 
     def get(self):
-        models = preference_service.query_preferences()
+
+        kwargs = {}
+        models = preference_service.query_preferences(**kwargs)
         return_resources = []
         for pref_model in models:
             return_resources.append(self.model_to_rest_resource(pref_model, True))

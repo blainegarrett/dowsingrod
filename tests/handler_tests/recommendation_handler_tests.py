@@ -2,6 +2,9 @@ import webapp2
 import json
 import main
 from tests import BaseCase
+from tests import dataset
+from models import PreferenceModel
+from services import preference_service
 
 
 class RecommendationHandlerTestsBase(BaseCase):
@@ -36,7 +39,8 @@ class RuleSetCollectionHandlerTests(RecommendationHandlerTestsBase):
 
     def test_post_with_params(self):
         # Generate Ruleset with min requirements
-        request = webapp2.Request.blank('/api/rest/v1.0/rulesets?min_confidence=.345&min_support=.45')
+        url = '/api/rest/v1.0/rulesets?min_confidence=.345&min_support=.45'
+        request = webapp2.Request.blank(url)
         request.method = 'POST'
         request.content_type = 'application/json'
 
@@ -53,30 +57,62 @@ class RuleSetCollectionHandlerTests(RecommendationHandlerTestsBase):
         self.assertEqual(result['results']['min_support'], .45)
 
 
+class AssociationRulesCollectionHandlerTests(RecommendationHandlerTestsBase):
 
-'''
-class RecommendatioDetailHandlerTests(RecommendationHandlerTestsBase):
-    """
-    """
-    def test_get_404(self):
+    def setUp(self):
+        super(AssociationRulesCollectionHandlerTests, self).setUp()
 
-        request = webapp2.Request.blank('/api/rest/v1.0/preferences/asdf')
-        #   Get a response for that request.
+        u = 0
+        models_to_put = []
+        for txn in dataset.data2:
+            u += 1
+            for txn_item in txn:
+                models_to_put.append(PreferenceModel("user%s" % u, txn_item, True))
+        preference_service.record_preference(models_to_put)
+
+        # Generate 2 association rule sets on the same data with different confidence
+        url = '/api/rest/v1.0/rulesets?min_confidence=.1&min_support=.1'
+        request = webapp2.Request.blank(url)
+        request.method = 'POST'
+        request.content_type = 'application/json'
         response = request.get_response(main.app)
+        self.assertEqual(response.status_int, 200)
+        result = json.loads(response.body)
 
-        # Let's check if the response is correct.
-        self.assertEqual(response.status_int, 404)
-        self.assertTrue("Preference with resource_id \'asdf\' not found" in response.body)
+        self.ruleset_id1 = result['results']['resource_id']
 
-    def test_get_success(self):
-        p = PreferenceModel('u1', 'i1', True, None)
-        p = preference_service.record_preference(p)
+        url = '/api/rest/v1.0/rulesets?min_confidence=.70&min_support=.45'
+        request = webapp2.Request.blank(url)
+        request.method = 'POST'
+        request.content_type = 'application/json'
+        response = request.get_response(main.app)
+        self.assertEqual(response.status_int, 200)
+        result = json.loads(response.body)
 
-        request = webapp2.Request.blank('/api/rest/v1.0/preferences/%s' % p.id)
-        #   Get a response for that request.
+        self.ruleset_id2 = result['results']['resource_id']
+
+    def test_get(self):
+        # Get w/o rule param
+        request = webapp2.Request.blank('/api/rest/v1.0/recommendations')
+        request.method = 'GET'
+        request.content_type = 'application/json'
         response = request.get_response(main.app)
 
         # Let's check if the response is correct.
         self.assertEqual(response.status_int, 200)
-        self.assertTrue(p.id in response.body)
-'''
+        result = json.loads(response.body)
+        self.assertEquals(12, len(result['results']))
+
+        # Re-run with a specific ruleset id
+        url = '/api/rest/v1.0/recommendations?ruleset_id=' + self.ruleset_id1
+        request = webapp2.Request.blank(url)
+        request.method = 'GET'
+        request.content_type = 'application/json'
+
+        #  Get a response for that request.
+        response = request.get_response(main.app)
+
+        # Let's check if the response is correct.
+        self.assertEqual(response.status_int, 200)
+        result = json.loads(response.body)
+        self.assertEquals(78, len(result['results']))

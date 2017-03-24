@@ -85,6 +85,8 @@ def _query_rule_entities(*args, **kwargs):
     if (kwargs.get('ruleset_id', None)):
         q = q.filter(AssociationRuleEntity.ruleset_id == kwargs.get('ruleset_id'))
 
+    q = q.order(-AssociationRuleEntity.confidence)
+
     # Sorting
     entities = q.fetch(1000)
     return entities

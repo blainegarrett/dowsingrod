@@ -338,10 +338,18 @@ Deletes all the association rules
 
 
 
-### Get Reccomendations - get Latest Association Rules (by RuleSets' max create_date)
+### Get Reccomendations
+
+Get Latest Association Rules (by `AssociationRuleSetEntity`'s max create_date)
 ```
 GET /api/rest/v1.0/recommendation
 ```
+
+Get Association Rules for a given `AssociationRuleSetEntity` based on its resource_id
+```
+GET /api/rest/v1.0/recommendation?ruleset_id=:resource_id
+```
+
 #### Response Body
 The response body results are a list of `AssociationRule Resource Object`
 ```

@@ -108,12 +108,30 @@ class RecommendationCollectionHandler(RecommendationsHandlerBase):
     """
     """
 
+    def get_param_schema(self):
+        # Validators for schema
+
+        return {
+            'ruleset_id': voluptuous.Coerce(str),
+        }
+
     def get(self):
         """
-        Retrieve a set of rules based on the latest generated AssociationRuleSet
+        Retrieve a set of rules based on a generated AssociationRuleSet
         """
-        ruleset = rule_service.query_rule_sets()[0]
-        models = rule_service.query_rules(ruleset_id=ruleset.id)
+
+        # Determine AssociationRuleSet to use
+        if self.cleaned_params.get('ruleset_id', None):
+            ruleset_id = self.cleaned_params['ruleset_id']
+        else:
+            # TODO: None check... return default rules?
+            rules = rule_service.query_rule_sets()
+            if len(rules) == 0:
+                raise Exception("There are no rulesets generated. TODO: smart defaults?")
+            ruleset_id = rules[0].id
+
+        # Query for the rule models by ruleset_id
+        models = rule_service.query_rules(ruleset_id=ruleset_id)
         return_resources = []
         for model in models:
             return_resources.append(self.model_to_rest_resource(model, True))
