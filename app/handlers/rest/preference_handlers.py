@@ -1,4 +1,3 @@
-import voluptuous
 from rest_core import handlers
 from rest_core.resources import Resource
 from rest_core.resources import RestField
@@ -74,10 +73,12 @@ class PreferenceCollectionHandler(PreferenceBaseHandler):
     def validate_payload(self):  # aka Form.clean
         """
         Validate the request payload against the rest rules
-        This only works for a single payload entity, not a list...
         """
 
-        # rules = self.get_rules()
+        # This is easy to screw up for this handler and the err is otherwise confusing
+        if not isinstance(self.data, list):
+            t = type(self.data)
+            raise Exception("Expecting a `list` of Preference Resources. Received %s" % t)
 
         self.cleaned_data = []
         for d in self.data:
