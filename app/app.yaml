@@ -1,4 +1,4 @@
-application: dowsingrod
+application: pref-service-dev
 version:  pydefault
 runtime: python27
 api_version: 1

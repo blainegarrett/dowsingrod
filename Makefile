@@ -50,5 +50,8 @@ run:
 #dispatch:
 #	appcfg.py -A arts-612 update_dispatch .
 
-#deploy:
-#	appcfg.py update -A arts-612 -V $(filter-out $@,$(MAKECMDGOALS)) ./app/app.yaml
+deploy:
+	appcfg.py update -A pref-service-dev -V $(filter-out $@,$(MAKECMDGOALS)) ./app/app.yaml
+
+deploy_prod:
+	appcfg.py update -A pref-service -V $(filter-out $@,$(MAKECMDGOALS)) ./app/app.yaml
