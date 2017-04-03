@@ -28,6 +28,12 @@ web_routes = [
                   'handlers.rest.recommendation_handlers.RecommendationCollectionHandler',
                   strict_slash=True,
                   name="RecommendationsHandler"),
+
+    RedirectRoute('/api/rest/v1.0/recommendations/<user_id>',
+                  'handlers.rest.recommendation_handlers.RecommendationForUserHandler',
+                  strict_slash=True,
+                  name="RecommendationForUserHandler"),
+
     RedirectRoute('/api/rest/v1.0/preferences/list',
                   'handlers.rest.preference_handlers.PreferenceListHandler',
                   strict_slash=True,

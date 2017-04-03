@@ -1,4 +1,6 @@
 import voluptuous
+import itertools
+import logging
 from rest_core import handlers
 from rest_core.resources import Resource
 from rest_core.resources import RestField
@@ -38,6 +40,23 @@ ASSOCIATION_RULE_SET_FIELDS = [
     RestField(AssociationRuleSetModel.total_rules, output_only=True),
     DatetimeField(AssociationRuleSetModel.created_timestamp, output_only=True),
 ]
+
+
+def generate_rule_key(ant):
+    """
+    Generate an identifier for a rule key based on the antecedant items
+    """
+
+    # General cleanup
+    cleaned_items = []
+    for item in ant:
+        cleaned_items.append(item.lower().replace(' ', '_'))
+
+    # Sort
+    cleaned_items.sort()
+
+    # Concat them together
+    return '__'.join(cleaned_items)
 
 
 class RuleSetHandler(handlers.RestHandlerBase):
@@ -134,6 +153,98 @@ class RecommendationCollectionHandler(RecommendationsHandlerBase):
         models = rule_service.query_rules(ruleset_id=ruleset_id)
         return_resources = []
         for model in models:
+            return_resources.append(self.model_to_rest_resource(model, True))
+        self.serve_success(return_resources)
+
+
+class RecommendationForUserHandler(RecommendationsHandlerBase):
+    """
+    Handler to get a recco for a specific user
+    """
+
+    def get_reccomendations_for_user(self, user_id):
+
+        # Get Preferences for the user
+        pref_models = preference_service.query_preferences(user_id=user_id)
+        if (not pref_models):
+            logging.error('no prefs for user... revert to defaults')
+            return []
+
+        # Generate a set of keys for these items to be used in rule look ups
+        pref_key_list = {}
+        for p in pref_models:
+            pref_key_list[p.get_rule_item_id()] = p
+
+        # Generate all the combos
+        combos = []
+        for r in range(len(pref_key_list)):
+            combos += list(itertools.combinations(pref_key_list, r + 1))
+
+        # Convert the combos to keys to do look up on rules
+        rule_keys = []
+        for c in combos:
+            rule_keys.append(generate_rule_key(c))
+
+        # Query for all the assoc rules
+        # Determine AssociationRuleSet to use
+        rules = rule_service.query_rule_sets()
+        if len(rules) == 0:
+            return []
+            logging.error("There are no rulesets generated. TODO: smart defaults?")
+        ruleset_id = rules[0].id
+
+        # Query for the rule models by ruleset_id
+        rule_models = rule_service.query_rules(ruleset_id=ruleset_id)
+
+        rule_map = {}
+        for rule_model in rule_models:
+            rule_map[rule_model.rule_key] = rule_model
+
+        # Log out what prefs have been recorded
+        #print "====== RULE MAPPING ======="
+        #for key, r in rule_map.items():
+        #    print "* %s : %s" % (key, r)
+
+        #print "====== PREF MAPPING ======="
+        #for key, p in pref_key_list.items():
+        #    print "* %s : %s" % (key, p)
+
+        return_rule_models = []
+        # See if any of our keys match rules that we have not seen yet
+        for rule_key in rule_keys:
+            rule = rule_map.get(rule_key)
+
+            if (rule):
+                potential_target_id = rule.con[0].split(':')[0]
+
+                #print "Potential target id %s " % potential_target_id
+                # Figure out if we have not pref'd it yet
+                target_not_seen = True
+                for item_key, p in pref_key_list.items():
+                    #print " - %s =?= %s" % (potential_target_id, p.item_id)
+                    if potential_target_id == p.item_id:
+                        target_not_seen = False
+                if target_not_seen:
+                    return_rule_models.append(rule)
+
+        if not return_rule_models:
+            logging.error("No association rules exist...")
+        return return_rule_models
+
+    def get_param_schema(self):
+        # Validators for schema
+
+        return {
+            'ruleset_id': voluptuous.Coerce(str),
+        }
+
+    def get(self, user_id):
+        """
+        Retrieve a set of rules based on a generated AssociationRuleSet
+        """
+
+        return_resources = []
+        for model in self.get_reccomendations_for_user(user_id):
             return_resources.append(self.model_to_rest_resource(model, True))
         self.serve_success(return_resources)
 

@@ -12,6 +12,7 @@ class PreferenceEntity(ndb.Model):
     synced_timestamp = ndb.DateTimeProperty(auto_now_add=True)  # Timestamp when pref synced
 
     def get_rule_item_id(self):
+        # TODO: This is duplicated on the model
         return '%s:%s' % (self.item_id, str(int(self.pref)))
 
 

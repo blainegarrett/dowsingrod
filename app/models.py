@@ -32,6 +32,10 @@ class PreferenceModel(Model):
     def generate_key(self):
         return "%s-%s" % (self.user_id, self.item_id)
 
+    def get_rule_item_id(self):
+        # TODO: This is duplicated on the entity
+        return '%s:%s' % (self.item_id, str(int(self.pref)))
+
 
 class AssociationRuleSetModel(Model):
     """Persistance model to Appengine to Store a association rule set"""
