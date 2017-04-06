@@ -23,8 +23,8 @@ DEFAULT_MIN_SUPPORT = .75
 DEFAULT_MIN_CONFIDENCE = .5
 
 ASSOCIATION_RULES_FIELDS = [
-    ResourceIdField(output_only=True),
-    ResourceUrlField('/api/rest/v1.0/recommendations/%s', output_only=True),
+    ResourceIdField(output_only=True, verbose_only=True),
+    ResourceUrlField('/api/rest/v1.0/recommendations/%s', output_only=True,  verbose_only=True),
     RestField(AssociationRuleModel.ant, required=False),
     RestField(AssociationRuleModel.con, required=False),
     RestField(AssociationRuleModel.confidence, required=True),
@@ -33,12 +33,12 @@ ASSOCIATION_RULES_FIELDS = [
 
 resource_url = '/api/rest/v1.0/rulesets/%s'
 ASSOCIATION_RULE_SET_FIELDS = [
-    ResourceIdField(output_only=True),
-    ResourceUrlField('/api/rest/v1.0/recommendation/%s', output_only=True),
+    ResourceIdField(output_only=True, verbose_only=True),
+    ResourceUrlField('/api/rest/v1.0/recommendation/%s', output_only=True,  verbose_only=True),
     RestField(AssociationRuleSetModel.min_confidence, output_only=True),
     RestField(AssociationRuleSetModel.min_support, output_only=True),
     RestField(AssociationRuleSetModel.total_rules, output_only=True),
-    DatetimeField(AssociationRuleSetModel.created_timestamp, output_only=True),
+    DatetimeField(AssociationRuleSetModel.created_timestamp, output_only=True, verbose_only=True),
 ]
 
 
@@ -98,7 +98,8 @@ class RuleSetCollectionHandler(RuleSetHandler):
         rule_service.generate_association_rules(ruleset_model.id, min_support, min_confidence)
 
         # Return the ruleset
-        self.serve_success(self.model_to_rest_resource(ruleset_model, True))
+        self.serve_success(self.model_to_rest_resource(ruleset_model,
+                                                       self.cleaned_params.get('verbose')))
 
     def get(self):
         # TODO: MOVE TO API LEVEL
@@ -106,7 +107,8 @@ class RuleSetCollectionHandler(RuleSetHandler):
         return_resources = []
         models = rule_service.query_rule_sets()
         for model in models:
-            return_resources.append(self.model_to_rest_resource(model, True))
+            return_resources.append(self.model_to_rest_resource(model,
+                                                       self.cleaned_params.get('verbose')))
         self.serve_success(return_resources)
 
 
@@ -200,15 +202,6 @@ class RecommendationForUserHandler(RecommendationsHandlerBase):
         for rule_model in rule_models:
             rule_map[rule_model.rule_key] = rule_model
 
-        # Log out what prefs have been recorded
-        #print "====== RULE MAPPING ======="
-        #for key, r in rule_map.items():
-        #    print "* %s : %s" % (key, r)
-
-        #print "====== PREF MAPPING ======="
-        #for key, p in pref_key_list.items():
-        #    print "* %s : %s" % (key, p)
-
         return_rule_models = []
         # See if any of our keys match rules that we have not seen yet
         for rule_key in rule_keys:
@@ -217,11 +210,10 @@ class RecommendationForUserHandler(RecommendationsHandlerBase):
             if (rule):
                 potential_target_id = rule.con[0].split(':')[0]
 
-                #print "Potential target id %s " % potential_target_id
                 # Figure out if we have not pref'd it yet
                 target_not_seen = True
                 for item_key, p in pref_key_list.items():
-                    #print " - %s =?= %s" % (potential_target_id, p.item_id)
+
                     if potential_target_id == p.item_id:
                         target_not_seen = False
                 if target_not_seen:

@@ -13,7 +13,7 @@ class PreferenceHandlerTestsBase(BaseCase):
 class PreferenceCollectionHandlerTests(PreferenceHandlerTestsBase):
     def test_empty_get(self):
 
-        request = webapp2.Request.blank('/api/rest/v1.0/preferences')
+        request = webapp2.Request.blank('/api/rest/v1.0/preferences?verbose=true')
         #   Get a response for that request.
         response = request.get_response(main.app)
 
@@ -21,7 +21,7 @@ class PreferenceCollectionHandlerTests(PreferenceHandlerTestsBase):
         self.assertEqual(response.status_int, 200)
 
     def test_post(self):
-        request = webapp2.Request.blank('/api/rest/v1.0/preferences')
+        request = webapp2.Request.blank('/api/rest/v1.0/preferences?verbose=true')
         request.method = 'POST'
         request.content_type = 'application/json'
         request.body = json.dumps([{'item_id': 'asdf', 'pref': True, 'user_id': 'user1'}])
@@ -37,7 +37,7 @@ class PreferenceDetailHandlerTests(PreferenceHandlerTestsBase):
     """
     def test_get_404(self):
 
-        request = webapp2.Request.blank('/api/rest/v1.0/preferences/asdf')
+        request = webapp2.Request.blank('/api/rest/v1.0/preferences/asdf?verbose=true')
         #   Get a response for that request.
         response = request.get_response(main.app)
 
@@ -49,7 +49,7 @@ class PreferenceDetailHandlerTests(PreferenceHandlerTestsBase):
         p = PreferenceModel('u1', 'i1', True, None)
         p = preference_service.record_preference(p)
 
-        request = webapp2.Request.blank('/api/rest/v1.0/preferences/%s' % p.id)
+        request = webapp2.Request.blank('/api/rest/v1.0/preferences/%s?verbose=true' % p.id)
         #   Get a response for that request.
         response = request.get_response(main.app)
 

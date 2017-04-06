@@ -14,7 +14,7 @@ class RecommendationHandlerTestsBase(BaseCase):
 class RuleSetCollectionHandlerTests(RecommendationHandlerTestsBase):
     def test_empty_get(self):
 
-        request = webapp2.Request.blank('/api/rest/v1.0/rulesets')
+        request = webapp2.Request.blank('/api/rest/v1.0/rulesets?verbose=true')
         #   Get a response for that request.
         response = request.get_response(main.app)
 
@@ -23,7 +23,7 @@ class RuleSetCollectionHandlerTests(RecommendationHandlerTestsBase):
 
     def test_post(self):
         # Generate Ruleset
-        request = webapp2.Request.blank('/api/rest/v1.0/rulesets')
+        request = webapp2.Request.blank('/api/rest/v1.0/rulesets?verbose=true')
         request.method = 'POST'
         request.content_type = 'application/json'
 
@@ -39,7 +39,7 @@ class RuleSetCollectionHandlerTests(RecommendationHandlerTestsBase):
 
     def test_post_with_params(self):
         # Generate Ruleset with min requirements
-        url = '/api/rest/v1.0/rulesets?min_confidence=.345&min_support=.45'
+        url = '/api/rest/v1.0/rulesets?min_confidence=.345&min_support=.45&verbose=true'
         request = webapp2.Request.blank(url)
         request.method = 'POST'
         request.content_type = 'application/json'
@@ -71,7 +71,7 @@ class AssociationRulesCollectionHandlerTests(RecommendationHandlerTestsBase):
         preference_service.record_preference(models_to_put)
 
         # Generate 2 association rule sets on the same data with different confidence
-        url = '/api/rest/v1.0/rulesets?min_confidence=.1&min_support=.1'
+        url = '/api/rest/v1.0/rulesets?min_confidence=.1&min_support=.1&verbose=true'
         request = webapp2.Request.blank(url)
         request.method = 'POST'
         request.content_type = 'application/json'
@@ -81,7 +81,7 @@ class AssociationRulesCollectionHandlerTests(RecommendationHandlerTestsBase):
 
         self.ruleset_id1 = result['results']['resource_id']
 
-        url = '/api/rest/v1.0/rulesets?min_confidence=.70&min_support=.45'
+        url = '/api/rest/v1.0/rulesets?min_confidence=.70&min_support=.45&verbose=true'
         request = webapp2.Request.blank(url)
         request.method = 'POST'
         request.content_type = 'application/json'
@@ -93,7 +93,7 @@ class AssociationRulesCollectionHandlerTests(RecommendationHandlerTestsBase):
 
     def test_get(self):
         # Get w/o rule param
-        request = webapp2.Request.blank('/api/rest/v1.0/recommendations')
+        request = webapp2.Request.blank('/api/rest/v1.0/recommendations?verbose=true')
         request.method = 'GET'
         request.content_type = 'application/json'
         response = request.get_response(main.app)
@@ -104,7 +104,7 @@ class AssociationRulesCollectionHandlerTests(RecommendationHandlerTestsBase):
         self.assertEquals(12, len(result['results']))
 
         # Re-run with a specific ruleset id
-        url = '/api/rest/v1.0/recommendations?ruleset_id=' + self.ruleset_id1
+        url = '/api/rest/v1.0/recommendations?verbose=true&ruleset_id=' + self.ruleset_id1
         request = webapp2.Request.blank(url)
         request.method = 'GET'
         request.content_type = 'application/json'

@@ -12,8 +12,8 @@ from models import PreferenceModel
 
 resource_url = '/api/rest/v1.0/preferences/%s'
 PREFERENCE_FIELDS = [
-    ResourceIdField(output_only=True),
-    ResourceUrlField(resource_url, output_only=True),
+    ResourceIdField(output_only=True, verbose_only=True),
+    ResourceUrlField(resource_url, output_only=True, verbose_only=True),
     RestField(PreferenceModel.user_id, required=True),
     RestField(PreferenceModel.item_id, required=True),
     BooleanField(PreferenceModel.pref, required=True),
@@ -52,7 +52,8 @@ class PreferenceDetailHandler(PreferenceBaseHandler):
     """
     def get(self, resource_id):
         pref_model = self.get_model_by_id_or_error(resource_id)
-        result = self.model_to_rest_resource(pref_model, True)
+        result = self.model_to_rest_resource(pref_model,
+                                             self.cleaned_params.get('verbose'))
         self.serve_success(result)
 
 
@@ -67,7 +68,8 @@ class PreferenceCollectionHandler(PreferenceBaseHandler):
         models = preference_service.query_preferences(**kwargs)
         return_resources = []
         for pref_model in models:
-            return_resources.append(self.model_to_rest_resource(pref_model, True))
+            return_resources.append(self.model_to_rest_resource(pref_model,
+                                                                self.cleaned_params.get('verbose')))
         self.serve_success(return_resources)
 
     def validate_payload(self):  # aka Form.clean
@@ -96,5 +98,6 @@ class PreferenceCollectionHandler(PreferenceBaseHandler):
 
         models = preference_service.record_preference(models)
         for pref_model in models:
-            return_resources.append(self.model_to_rest_resource(pref_model, True))
+            return_resources.append(self.model_to_rest_resource(pref_model,
+                                                                self.cleaned_params.get('verbose')))
         self.serve_success(return_resources)
