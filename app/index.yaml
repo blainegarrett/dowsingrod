@@ -15,3 +15,9 @@ indexes:
   - name: ruleset_id
   - name: confidence
     direction: desc
+
+- kind: PreferenceEntity
+  properties:
+  - name: user_id
+  - name: synced_timestamp
+    direction: desc

@@ -3,9 +3,36 @@ Server API for "dowsingrod project" reccomendation engine project
 
 
 ## Installation
-Full installation instructions coming soon (https://github.com/blainegarrett/dowsingrod/issues/4)
-ls $GAE_PYTHONPATH
-echo $GAE_PYTHONPATH
+Note: This assumes you are running python 2.7, have pip and [virtualenv](http://virtualenvwrapper.readthedocs.io/en/latest/install.html) installed. It is untested with other environments.
+
+Also be sure to install [gcloud sdk](https://cloud.google.com/sdk/downloads).
+
+#### Check Out Code
+
+Clone repo from `git@github.com:blainegarrett/dowsingrod.git`
+into ~/sites/dowsingrod/ or your preferred directory
+
+#### Install Dependencies
+Setup Virtual Env so we don't clutter global python dependencies
+`cd ~/sites/dowsingrod/`
+
+`mkvirtualenv dowsingrod -a .`
+
+`make install`
+
+
+#### Symlink GAE env
+Type `which dev_appserver.py ` or `locate dev_appserver.py ` and copy this path.
+
+Open your shell profile (`pico ~/.bash_profile `) and add the following line using your path:
+
+`export GAE_PYTHONPATH='/Users/blainegarrett/google-cloud-sdk/platform/google_appengine'`
+
+Run `source .bash_profile` or open a new shell and type.
+`ls $GAE_PYTHONPATH`
+`echo $GAE_PYTHONPATH`
+
+If these echo your path, we should be set. Run `make unit` in the project dir to run unit tests.
 
 
 ## Issues/TODOs:
@@ -25,9 +52,8 @@ user_id | string | *required* | identifier of user recording the preference, use
 pref | boolean | *required* | true or false of if the user liked or disliked the item
 timestamp | ISO Datestamp | *optional* | timestamp of when the preference took place. Useful for when batch syncing preferences
 synced_timestamp | ISO Datestamp | *output only* | timestamp when model was persisted
-resource_id | string | *output only* | resource_id for this `PreferenceModel`
-resource_type | string | *output only* | always `PreferenceModel`
-resource_url | string | *output only* | restful url to resource
+resource_id | string | *verbose & output only* | resource_id for this `PreferenceModel`
+resource_url | string | *verbose & output only* | restful url to resource
 
 #### Example Input
 ```
@@ -38,7 +64,7 @@ resource_url | string | *output only* | restful url to resource
             "user_id": "user2",
         }
 ```
-#### Example Output
+#### Example Output (verbose)
 ```
         {
             "_meta": {
@@ -67,9 +93,8 @@ min_confidence | float | *optional* | min confidence used to prune rule set is p
 min_support | float | *optional* | min support used to prune rule set that is persisted - defaults to .5
 created_timestamp | ISO Datestamp | *required* | Timestamp of when Ruleset was generated
 total_rules | int | *required* | Confidence the rule is correct in the range of [0...1]
-resource_id | string | *output only* | resource_id for this `AssociationRuleSet`
-resource_type | string | *output only* | always `AssociationRuleSet`
-resource_url | string | *output only* | restful url to resource
+resource_id | string | *verbose & output only* | resource_id for this `AssociationRuleSet`
+resource_url | string | *verbose & output only* | restful url to resource
 
 #### Example Output
 ```
@@ -98,9 +123,8 @@ Name | Type | Note | Description
 ant | array | *required* | Rule antecedant list of `rule_item_key` strings described above
 con | array | *required* | Rule consequent list of `rule_item_key` strings described above
 confidence | float | *required* | Confidence the rule is correct in the range of [0...1]
-resource_id | string | *output only* | resource_id for this `AssociationRule`
-resource_type | string | *output only* | always `AssociationRule`
-resource_url | string | *output only* | restful url to resource
+resource_id | string | *verbose & output only* | resource_id for this `AssociationRule`
+resource_url | string | *verbose & output only* | restful url to resource
 
 
 #### Example Output
@@ -126,6 +150,7 @@ resource_url | string | *output only* | restful url to resource
 
 
 ### List Preferences
+This is mostly for debugging. Returned resources are sorted by sync_timestamp DESC
 ```
 GET /api/rest/v1.0/preferences
 ```
@@ -158,6 +183,7 @@ GET /api/rest/v1.0/preferences
 ```
 
 ### Get a Preference
+This is mostly for debugging. Returned resources are sorted by sync_timestamp DESC
 ```
 GET /api/rest/v1.0/preferences/:resource_id
 ```
@@ -340,14 +366,14 @@ Deletes all the association rules
 
 ### Get Reccomendations
 
-Get Latest Association Rules (by `AssociationRuleSetEntity`'s max create_date)
+Get Latest Association Rules (by `AssociationRuleSetEntity`'s max create_date). Returned resources are sorted by `confidence` DESC
 ```
 GET /api/rest/v1.0/recommendation
 ```
 
 Get Association Rules for a given `AssociationRuleSetEntity` based on its resource_id
 ```
-GET /api/rest/v1.0/recommendation?ruleset_id=:resource_id
+GET /api/rest/v1.0/recommendations?ruleset_id=:resource_id
 ```
 
 #### Response Body
@@ -380,6 +406,49 @@ The response body results are a list of `AssociationRule Resource Object`
     "status": 200
 }
 ```
+
+
+### Get Reccomendations based on a User's session
+
+Get a set of rules from the latest rule set for a given user. This will take into account the user's preferences and return only exact matches for the user based on these preferneces.
+
+```
+GET /api/rest/v1.0/recommendation/:user_id
+```
+
+#### Response Body
+The response body results are a list of `AssociationRule Resource Object`
+```
+{
+    "messages": [
+        null
+    ],
+    "results": [
+        {
+            "_meta": {
+                "is_verbose": true,
+                "resource_type": "AssociationRuleModel"
+            },
+            "ant": [
+                "Bread:1"
+            ],
+            "con": [
+                "Jelly:1"
+            ],
+            "confidence": 0.7474747474747475,
+            "resource_id": "QXNzb2NpYXRpb25SdWxlRW50aXR5Hh82NTIwNzkxMTQ3NDc5MDQw",
+            "resource_type": "AssociationRuleModel",
+            "resource_url": "/api/rest/v1.0/recommendation/QXNzb2NpYXRpb25SdWxlRW50aXR5Hh82NTIwNzkxMTQ3NDc5MDQw",
+            "rule_key": "bread:1"
+        },
+        ...
+    ],
+    "status": 200
+}
+```
+
+
+
 
 ### Temp process to populate test data
 ```

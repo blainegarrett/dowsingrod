@@ -115,7 +115,7 @@ def _query_preference_entities(*args, **kwargs):
     if (kwargs.get('user_id', None)):
         q = q.filter(PreferenceEntity.user_id == kwargs.get('user_id'))
 
-    # TODO: Sorting
+    q = q.order(-PreferenceEntity.synced_timestamp)
     entities = q.fetch(1000)
     return entities
 
