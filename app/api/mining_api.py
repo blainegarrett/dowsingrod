@@ -11,9 +11,17 @@ from api.entities import AssociationRuleSetEntity
 
 from models import AssociationRuleSetModel
 from models import AssociationRuleModel
-from rest_core.utils import get_resource_id_from_key  # , get_key_from_resource_id
+from rest_core.utils import get_resource_id_from_key, get_key_from_resource_id
 
 # Association RuleSets
+
+
+def get_ruleset_by_id(ruleset_id):
+    # TODO: Ensure that this is of type AssociationRuleSet
+    # TODO: Unit test
+    key = get_key_from_resource_id(ruleset_id)
+    e = key.get()
+    return _populate_ruleset_model(e)
 
 
 def _query_ruleset_entities(*args, **kwargs):

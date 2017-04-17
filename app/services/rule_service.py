@@ -9,6 +9,9 @@ def query_rules(*args, **kwargs):
     return mining_api.query_rule_models(*args, **kwargs)
 
 
+def get_rule_set(ruleset_id):
+    return mining_api.get_ruleset_by_id(ruleset_id)
+
 def query_rule_sets():
     return mining_api.query_ruleset_models()
 

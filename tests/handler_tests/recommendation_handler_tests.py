@@ -11,6 +11,42 @@ class RecommendationHandlerTestsBase(BaseCase):
     pass
 
 
+class RuleSetDetailHandlerTests(RecommendationHandlerTestsBase):
+    def test_base(self):
+
+        # Generate a ruleset
+        url = '/api/rest/v1.0/rulesets?min_confidence=.345&min_support=.45&verbose=true'
+        request = webapp2.Request.blank(url)
+        request.method = 'POST'
+        request.content_type = 'application/json'
+
+        #   Get a response for that request.
+        response = request.get_response(main.app)
+
+        # Let's check if the response is correct.
+        self.assertEqual(response.status_int, 200)
+        result = json.loads(response.body)
+
+        self.assertEqual(result['results']['_meta']['resource_type'], 'AssociationRuleSetModel')
+
+        # Fetch the ruleset we just created
+        url = '/api/rest/v1.0/rulesets/%s' % result['results']['resource_id']
+        request = webapp2.Request.blank(url)
+        request.method = 'GET'
+        request.content_type = 'application/json'
+
+        #   Get a response for that request.
+        response = request.get_response(main.app)
+
+        # Let's check if the response is correct.
+        self.assertEqual(response.status_int, 200)
+        result = json.loads(response.body)
+
+        self.assertEqual(result['results']['_meta']['resource_type'], 'AssociationRuleSetModel')
+        self.assertEqual(result['results']['min_confidence'], .345)
+        self.assertEqual(result['results']['min_support'], .45)
+
+
 class RuleSetCollectionHandlerTests(RecommendationHandlerTestsBase):
     def test_empty_get(self):
 

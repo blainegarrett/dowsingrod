@@ -34,7 +34,7 @@ ASSOCIATION_RULES_FIELDS = [
 resource_url = '/api/rest/v1.0/rulesets/%s'
 ASSOCIATION_RULE_SET_FIELDS = [
     ResourceIdField(output_only=True, verbose_only=True),
-    ResourceUrlField('/api/rest/v1.0/recommendation/%s', output_only=True,  verbose_only=True),
+    ResourceUrlField('/api/rest/v1.0/rulesets/%s', output_only=True,  verbose_only=True),
     RestField(AssociationRuleSetModel.min_confidence, output_only=True),
     RestField(AssociationRuleSetModel.min_support, output_only=True),
     RestField(AssociationRuleSetModel.total_rules, output_only=True),
@@ -72,13 +72,22 @@ class RuleSetHandler(handlers.RestHandlerBase):
         return Resource(model, ASSOCIATION_RULE_SET_FIELDS).to_dict(verbose)
 
 
+class RuleSetDetailHandler(RuleSetHandler):
+    def get(self, ruleset_id):
+        """
+        Fetch a ruleset by id
+        """
+        model = rule_service.get_rule_set(ruleset_id)
+        resource = self.model_to_rest_resource(model, True)
+        self.serve_success(resource)
+
+
 class RuleSetCollectionHandler(RuleSetHandler):
 
     def get_param_schema(self):
         # Validators for schema
 
         return {
-            # 'pretty': voluptuous.Coerce(bool),   # TODO: Force rest api core to add this
             'min_confidence': voluptuous.Coerce(float),
             'min_support': voluptuous.Coerce(float)
         }

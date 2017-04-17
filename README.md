@@ -84,14 +84,14 @@ resource_url | string | *verbose & output only* | restful url to resource
 
 
 ### AssociationRuleSet Resource Object
-A resource representing a run the ruleset generation based on the PreferenceModels at the time it was run.
+A resource representing a run the RuleSet generation based on the PreferenceModels at the time it was run.
 
 
 Name | Type | Note | Description
 -----|------|------|-------
 min_confidence | float | *optional* | min confidence used to prune rule set is persisted - defaults to .5
 min_support | float | *optional* | min support used to prune rule set that is persisted - defaults to .5
-created_timestamp | ISO Datestamp | *required* | Timestamp of when Ruleset was generated
+created_timestamp | ISO Datestamp | *required* | Timestamp of when RuleSet was generated
 total_rules | int | *required* | Confidence the rule is correct in the range of [0...1]
 resource_id | string | *verbose & output only* | resource_id for this `AssociationRuleSet`
 resource_url | string | *verbose & output only* | restful url to resource
@@ -324,7 +324,7 @@ The response body results are a list of `AssociationRule Resource Object`
 }
 ```
 
-### List Rulesets
+### List RuleSets
 ```
 GET /api/rest/v1.0/rulesets
 ```
@@ -351,6 +351,34 @@ GET /api/rest/v1.0/rulesets
         },
         ...
     ],
+    "status": 200
+}
+```
+
+###  Get a specific RuleSet
+```
+GET /api/rest/v1.0/rulesets/:ruleset_id
+```
+
+#### Response Body
+```
+{
+    "messages": [
+        null
+    ],
+    "results": {
+        "_meta": {
+            "is_verbose": true,
+            "resource_type": "AssociationRuleSetModel"
+        },
+        "created_timestamp": "2017-03-17T04:50:45Z",
+        "min_confidence": 0.345,
+        "min_support": 0.45,
+        "resource_id": "QXNzb2NpYXRpb25SdWxlU2V0RW50aXR5Hh81Nzk5MjM2NjQxNzUxMDQw",
+        "resource_type": "AssociationRuleSetModel",
+        "resource_url": "/api/rest/v1.0/rulesets/QXNzb2NpYXRpb25SdWxlU2V0RW50aXR5Hh81Nzk5MjM2NjQxNzUxMDQw",
+        "total_rules": null
+    },
     "status": 200
 }
 ```

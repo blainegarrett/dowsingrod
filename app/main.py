@@ -24,6 +24,12 @@ web_routes = [
                   strict_slash=True,
                   name="RuleSetCollectionHandler"),
 
+    RedirectRoute('/api/rest/v1.0/rulesets/<ruleset_id>',
+                  'handlers.rest.recommendation_handlers.RuleSetDetailHandler',
+                  strict_slash=True,
+                  name="RuleSetCollectionHandler"),
+
+
     RedirectRoute('/api/rest/v1.0/recommendations',
                   'handlers.rest.recommendation_handlers.RecommendationCollectionHandler',
                   strict_slash=True,
