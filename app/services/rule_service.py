@@ -29,7 +29,7 @@ def delete_rules():
 
 def generate_association_rules_async(ruleset_id, min_support, min_confidence):
     logging.info("Enqueuing generate_association_rules")
-    async = Async(target='services.rule_service.generate_association_rules_async',
+    async = Async(target='services.rule_service.generate_association_rules',
                   args=(ruleset_id, min_support, min_confidence))
     async.start()
 
