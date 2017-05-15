@@ -10,5 +10,9 @@ builtins:
 
 # index files
 handlers:
+- url: /_queue/async.*
+  script: furious.handlers.webapp.app
+  login: admin
+
 - url: .*
   script: main.app

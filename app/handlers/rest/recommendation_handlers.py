@@ -104,7 +104,7 @@ class RuleSetCollectionHandler(RuleSetHandler):
         ruleset_model = rule_service.create_ruleset(min_support, min_confidence)
 
         # Generate the rules for the set
-        rule_service.generate_association_rules(ruleset_model.id, min_support, min_confidence)
+        rule_service.generate_association_rules_async(ruleset_model.id, min_support, min_confidence)
 
         # Return the ruleset
         self.serve_success(self.model_to_rest_resource(ruleset_model,

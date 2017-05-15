@@ -4,4 +4,5 @@
 pytz
 voluptuous
 git+git://github.com/Workiva/furious.git#egg=furious
-git+https://github.com/blainegarrett/rest-core@0.0.1-alpha#egg=rest-core
+git+https://github.com/blainegarrett/rest-core@0.0.3-alpha#egg=rest-core
+# git+https://github.com/blainegarrett/rest-core@master#egg=rest-core

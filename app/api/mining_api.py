@@ -54,6 +54,22 @@ def _populate_ruleset_model(entity):
     return m
 
 
+def _populate_ruleset_entity(model):
+    """
+    Populate a ndb entity from a model
+    """
+    data = {
+        'min_support': model.min_support,
+        'min_confidence': model.min_support,
+        'created_timestamp': model.created_timestamp,
+        'total_rules': model.total_rules,
+    }
+
+    if model.id:
+        data['key'] = get_key_from_resource_id(model.id)
+    return AssociationRuleSetEntity(**data)
+
+
 def create_ruleset(min_support, min_confidence):
     # TODO: Move to api layer
     e = AssociationRuleSetEntity()
