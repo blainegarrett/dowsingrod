@@ -2,4 +2,5 @@ REST_DEFAULT_ORIGIN = 'https://pref-service-dev.appspot.com'  # TODO: Set at run
 REST_WHITELIST_DOMAINS = []
 
 REST_WHITELIST_RULES = [r'http.*//pref-service-.*.appspot.com',
+                        r'htt.*://divining-admin.appspot.com',
                         r'http://localhost:.*']
