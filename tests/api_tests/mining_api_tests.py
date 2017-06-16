@@ -83,7 +83,7 @@ class QueryRuleEntitiesTests(MiningTestsBase):
         mining_api.create_rules('ruleset_id', [m1, m2])
 
     def test_no_params(self):
-        result = mining_api._query_rule_entities()
+        result, cursor, more = mining_api._query_rule_entities()
 
         self.assertEqual(len(result), 2)
         self.assertTrue(isinstance(result[0], mining_api.AssociationRuleEntity))
@@ -95,14 +95,14 @@ class QueryRuleModelsTests(MiningTestsBase):
     @patch('api.mining_api._populate_rule_model')
     def test_base(self, mock_populate, mock_query):
         # Setup Mocks
-        mock_query.return_value = ['a', 'b']
+        mock_query.return_value = (['a', 'b'], None, False)
 
         # Run Code To Test
-        result = mining_api.query_rule_models('arg', kwarg=True)
+        result = mining_api.query_rule_models(limit=4, kwarg=True)
 
         # Check results
-        self.assertEqual(result, [mock_populate.return_value, mock_populate.return_value])
-        mock_query.assert_called_once_with('arg', kwarg=True)
+        self.assertEqual(result, ([mock_populate.return_value, mock_populate.return_value], None, False))
+        mock_query.assert_called_once_with(limit=4, kwarg=True)
 
 
 @patch('api.mining_api.get_resource_id_from_key', return_value='mocked_id')
@@ -160,9 +160,9 @@ class DeleteRulesTests(MiningTestsBase):
 
     def base_test(self):
 
-        self.assertEqual(1, len(mining_api.query_rule_models()))
+        self.assertEqual(1, len(mining_api.query_rule_models()[0]))
         mining_api.delete_rules()
-        self.assertEqual(0, len(mining_api.query_rule_models()))
+        self.assertEqual(0, len(mining_api.query_rule_models()[0]))
 
 """
 

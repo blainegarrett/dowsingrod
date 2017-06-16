@@ -3,6 +3,7 @@ Internal Api for Data Mining Persistance
 """
 
 from google.appengine.ext import ndb
+from google.appengine.datastore.datastore_query import Cursor
 
 from thirdparty import apriori as apriori
 
@@ -11,6 +12,9 @@ from api.entities import AssociationRuleSetEntity
 
 from models import AssociationRuleSetModel
 from models import AssociationRuleModel
+
+from api.constants import DEFAULT_QUERY_LIMIT
+
 from rest_core.utils import get_resource_id_from_key, get_key_from_resource_id
 
 # Association RuleSets
@@ -24,26 +28,39 @@ def get_ruleset_by_id(ruleset_id):
     return _populate_ruleset_model(e)
 
 
-def _query_ruleset_entities(*args, **kwargs):
-    # TODO: Add support for filters, etc
+def _query_ruleset_entities(limit=DEFAULT_QUERY_LIMIT, cursor=None, *args, **kwargs):
+    if not limit:
+        limit = DEFAULT_QUERY_LIMIT
 
     q = AssociationRuleSetEntity.query()
     q = q.order(-AssociationRuleSetEntity.created_timestamp)
-    return q.fetch(1000)
+
+    entites, cursor, more = q.fetch_page(limit, start_cursor=cursor)
+    return entites, cursor, more
 
 
-def query_ruleset_models(*args, **kwargs):
+def query_ruleset_models(cursor=None, *args, **kwargs):
     """
     Query for a set of AssociationRuleSet Models
-    TODO: Needs pagination, search terms, etc
+    Returns a 3-tuple of (domain models, opaque cursor str, bool more)
     """
-    entities = _query_ruleset_entities(*args, **kwargs)
+
+    # Convert opaque cursor str to native appengine cursor
+    if cursor:
+        kwargs['cursor'] = Cursor(urlsafe=cursor)
+
+    entities, next_cursor, more = _query_ruleset_entities(*args, **kwargs)
 
     # Hydrate models to return to service layer
     models = []
     for e in entities:
         models.append(_populate_ruleset_model(e))
-    return models
+
+    # Convert native cursor to opaque str
+    if next_cursor:
+        next_cursor = next_cursor.urlsafe()
+
+    return models, next_cursor, more
 
 
 def _populate_ruleset_model(entity):
@@ -82,28 +99,38 @@ def create_ruleset(min_support, min_confidence):
 
 # Association rules
 
-def query_rule_models(*args, **kwargs):
+def query_rule_models(cursor=None, *args, **kwargs):
     """
     Query for a set of AssociationRule Models
-    TODO: Needs pagination, search terms, etc
+    Returns a 3-tuple of (domain models, opaque cursor str, bool more)
     """
-    entities = _query_rule_entities(*args, **kwargs)
+
+    # Convert opaque cursor str to native appengine cursor
+    if cursor:
+        kwargs['cursor'] = Cursor(urlsafe=cursor)
+
+    entities, next_cursor, more = _query_rule_entities(*args, **kwargs)
 
     # Hydrate models to return to service layer
     models = []
     for e in entities:
         models.append(_populate_rule_model(e))
 
-    return models
+    # Convert native cursor to opaque str
+    if next_cursor:
+        next_cursor = next_cursor.urlsafe()
+
+    return models, next_cursor, more
 
 
-def _query_rule_entities(*args, **kwargs):
+def _query_rule_entities(limit=DEFAULT_QUERY_LIMIT, cursor=None, *args, **kwargs):
     """
     Query for preference entities
     """
-    # TODO: Beef this up quite a bit
-    # TODO: Conditionally case to Models...
-    # TODO: This doesn't currently have unit tests around it
+    # TODO: This doesn't currently have unit tests around it ?
+
+    if not limit:
+        limit = DEFAULT_QUERY_LIMIT
 
     q = AssociationRuleEntity.query()
     if (kwargs.get('ruleset_id', None)):
@@ -111,9 +138,8 @@ def _query_rule_entities(*args, **kwargs):
 
     q = q.order(-AssociationRuleEntity.confidence)
 
-    # Sorting
-    entities = q.fetch(1000)
-    return entities
+    entites, cursor, more = q.fetch_page(limit, start_cursor=cursor)
+    return entites, cursor, more
 
 
 def create_rule(ruleset_id, model):
@@ -167,10 +193,9 @@ def delete_rules():
 def delete_rules_since(timestamp):
     """
     Batch Delete rules older than timestamp
+    TODO: Determine if this is cruft
     """
-    ndb.delete_multi(
-        AssociationRuleEntity.query().filter(AssociationRuleEntity.created_timestamp < timestamp).iter(keys_only=True)
-    )
+    ndb.delete_multi(AssociationRuleEntity.query().filter(AssociationRuleEntity.created_timestamp < timestamp).iter(keys_only=True))
     return True
 
 

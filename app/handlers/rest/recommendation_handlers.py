@@ -88,8 +88,10 @@ class RuleSetCollectionHandler(RuleSetHandler):
         # Validators for schema
 
         return {
-            'min_confidence': voluptuous.Coerce(float),
-            'min_support': voluptuous.Coerce(float)
+            u'min_confidence': voluptuous.Coerce(float),
+            u'min_support': voluptuous.Coerce(float),
+            u'limit': voluptuous.Coerce(int),
+            u'cursor': voluptuous.Coerce(str),
         }
 
     def post(self):
@@ -115,10 +117,15 @@ class RuleSetCollectionHandler(RuleSetHandler):
         # Return a paginated set of association rules
         return_resources = []
         is_verbose = self.cleaned_params.get('verbose')
-        models = rule_service.query_rule_sets()
+
+        kwargs = {
+            'limit': self.cleaned_params.get('limit', None),
+            'cursor': self.cleaned_params.get('cursor', None)
+        }
+        models, next_cursor, more = rule_service.query_rule_sets(**kwargs)
         for model in models:
             return_resources.append(self.model_to_rest_resource(model, is_verbose))
-        self.serve_success(return_resources)
+        self.serve_success(return_resources, {'cursor': next_cursor, 'more': more})
 
 
 # Association Rules
@@ -142,7 +149,9 @@ class RecommendationCollectionHandler(RecommendationsHandlerBase):
         # Validators for schema
 
         return {
-            'ruleset_id': voluptuous.Coerce(str),
+            u'ruleset_id': voluptuous.Coerce(str),
+            u'limit': voluptuous.Coerce(int),
+            u'cursor': voluptuous.Coerce(str),
         }
 
     def get(self):
@@ -161,11 +170,17 @@ class RecommendationCollectionHandler(RecommendationsHandlerBase):
             ruleset_id = rules[0].id
 
         # Query for the rule models by ruleset_id
-        models = rule_service.query_rules(ruleset_id=ruleset_id)
+        kwargs = {
+            'ruleset_id': ruleset_id,
+            'limit': self.cleaned_params.get('limit', None),
+            'cursor': self.cleaned_params.get('cursor', None)
+        }
+
+        models, next_cursor, more = rule_service.query_rules(**kwargs)
         return_resources = []
         for model in models:
             return_resources.append(self.model_to_rest_resource(model, True))
-        self.serve_success(return_resources)
+        self.serve_success(return_resources, {'cursor': next_cursor, 'more': more})
 
 
 class RecommendationForUserHandler(RecommendationsHandlerBase):

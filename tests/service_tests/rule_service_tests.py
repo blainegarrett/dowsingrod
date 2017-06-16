@@ -40,7 +40,7 @@ class GenerateAssociationRulesTests(RulesServiceTestsBase):
         self.assertTrue(result)
 
         # Check generated results
-        result = rule_service.query_rules(ruleset_id=ruleset_model.id)
+        result, cursor, more = rule_service.query_rules(ruleset_id=ruleset_model.id)
 
         self.assertEqual(len(result), 31)
         # Check aspects of the result... note: this is ordered by confidence so could be "random"
