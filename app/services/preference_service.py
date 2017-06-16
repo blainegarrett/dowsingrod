@@ -35,6 +35,7 @@ def record_preference(preference_models):
 def query_preferences(*args, **kwargs):
     """
     Query for a set of preferences models
+    :returns 3-tuple (models, cursor, more)
     """
 
     return preference_api.query_preference_models(*args, **kwargs)

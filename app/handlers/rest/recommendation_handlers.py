@@ -104,20 +104,20 @@ class RuleSetCollectionHandler(RuleSetHandler):
         ruleset_model = rule_service.create_ruleset(min_support, min_confidence)
 
         # Generate the rules for the set
-        rule_service.generate_association_rules_async(ruleset_model.id, min_support, min_confidence)
+        rule_service.generate_association_rules_async(ruleset_model.id, min_support,
+                                                      min_confidence)
 
         # Return the ruleset
         self.serve_success(self.model_to_rest_resource(ruleset_model,
                                                        self.cleaned_params.get('verbose')))
 
     def get(self):
-        # TODO: MOVE TO API LEVEL
-
+        # Return a paginated set of association rules
         return_resources = []
+        is_verbose = self.cleaned_params.get('verbose')
         models = rule_service.query_rule_sets()
         for model in models:
-            return_resources.append(self.model_to_rest_resource(model,
-                                                       self.cleaned_params.get('verbose')))
+            return_resources.append(self.model_to_rest_resource(model, is_verbose))
         self.serve_success(return_resources)
 
 
@@ -176,10 +176,12 @@ class RecommendationForUserHandler(RecommendationsHandlerBase):
     def get_reccomendations_for_user(self, user_id):
 
         # Get Preferences for the user
-        pref_models = preference_service.query_preferences(user_id=user_id)
+        pref_models, cursor, more = preference_service.query_preferences(user_id=user_id)
         if (not pref_models):
             logging.error('no prefs for user... revert to defaults')
             return []
+
+        # TODO: We're ignoring cursor, and more here for now. See: /issues/9
 
         # Generate a set of keys for these items to be used in rule look ups
         pref_key_list = {}

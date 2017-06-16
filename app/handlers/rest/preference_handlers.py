@@ -1,3 +1,4 @@
+import voluptuous
 from rest_core import handlers
 from rest_core.resources import Resource
 from rest_core.resources import RestField
@@ -62,15 +63,25 @@ class PreferenceCollectionHandler(PreferenceBaseHandler):
     Handler for a collection of Preferences
     """
 
+    def get_param_schema(self):
+        return {
+            u'limit': voluptuous.Coerce(int),
+            u'cursor': voluptuous.Coerce(str),
+        }
+
     def get(self):
 
-        kwargs = {}
-        models = preference_service.query_preferences(**kwargs)
+        kwargs = {
+            'limit': self.cleaned_params.get('limit', None),
+            'cursor': self.cleaned_params.get('cursor', None)
+        }
+
+        is_verbose = self.cleaned_params.get('verbose')
+        models, next_cursor, more = preference_service.query_preferences(**kwargs)
         return_resources = []
         for pref_model in models:
-            return_resources.append(self.model_to_rest_resource(pref_model,
-                                                                self.cleaned_params.get('verbose')))
-        self.serve_success(return_resources)
+            return_resources.append(self.model_to_rest_resource(pref_model, is_verbose))
+        self.serve_success(return_resources, {'cursor': next_cursor, 'more': more})
 
     def validate_payload(self):  # aka Form.clean
         """
@@ -89,6 +100,7 @@ class PreferenceCollectionHandler(PreferenceBaseHandler):
     def post(self):
         models = []
         return_resources = []
+        is_verbose = self.cleaned_params.get('verbose')
         for d in self.cleaned_data:
             model = PreferenceModel(d.get('user_id'),
                                     d.get('item_id'),
@@ -98,6 +110,5 @@ class PreferenceCollectionHandler(PreferenceBaseHandler):
 
         models = preference_service.record_preference(models)
         for pref_model in models:
-            return_resources.append(self.model_to_rest_resource(pref_model,
-                                                                self.cleaned_params.get('verbose')))
+            return_resources.append(self.model_to_rest_resource(pref_model, is_verbose))
         self.serve_success(return_resources)

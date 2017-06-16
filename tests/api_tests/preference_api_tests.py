@@ -4,7 +4,7 @@ from tests import BaseCase
 from api import preference_api
 from models import PreferenceModel
 
-BDAY_TUPLE = (1982, 9, 2, 16, 30, 0)  # yay my birthday
+BDAY_TUPLE = (1982, 9, 2, 16, 30, 0)  # Blane's birthday
 
 
 class PreferenceTestsBase(BaseCase):
@@ -92,7 +92,7 @@ class QueryEntitiesTests(PreferenceTestsBase):
         """
         Simple test to ensure we query for all existing preference entities
         """
-        entities = preference_api._query_preference_entities()
+        entities, cursor, more = preference_api._query_preference_entities()
         self.assertEqual(len(entities), 2)
         self.assertTrue(isinstance(entities[0], preference_api.PreferenceEntity))
         self.assertTrue(isinstance(entities[1], preference_api.PreferenceEntity))
@@ -103,14 +103,14 @@ class QueryModelsTests(PreferenceTestsBase):
     @patch('api.preference_api._populate_model')
     def test_base(self, mock_populate, mock_query):
         # Setup Mocks
-        mock_query.return_value = ['a', 'b']
+        mock_query.return_value = (['a', 'b'], None, False)
 
         # Run Code To Test
-        result = preference_api.query_preference_models('arg', kwarg=True)
+        models, cursor, more = preference_api.query_preference_models(limit=4, kwarg=True)
 
         # Check results
-        self.assertEqual(result, [mock_populate.return_value, mock_populate.return_value])
-        mock_query.assert_called_once_with('arg', kwarg=True)
+        self.assertEqual(models, [mock_populate.return_value, mock_populate.return_value])
+        mock_query.assert_called_once_with(limit=4, kwarg=True)
 
 
 class GetTxnDataTests(PreferenceTestsBase):

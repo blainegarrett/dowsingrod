@@ -3,14 +3,18 @@ Low level API surrounding preferences persistance
 Keep all persistance implementation in this layer and return models to service layer
 """
 from google.appengine.ext import ndb
+from google.appengine.datastore.datastore_query import Cursor
+
 from api.entities import PreferenceEntity
 from models import PreferenceModel
+from api.constants import DEFAULT_QUERY_LIMIT
+from api.constants import BATCH_SIZE
 from rest_core.utils import get_resource_id_from_key, get_key_from_resource_id
 
 
 def get_model_by_id(id):
     """
-    Get a domain model by id
+    Get a Preference domain model by id
     """
     e = _get_by_id(id)
     if not e:
@@ -53,6 +57,9 @@ def create_multi(models):
 
 
 def _get_by_id(id):
+    """
+    Get an ndb entity by resource_id
+    """
     try:
         key = get_key_from_resource_id(id)
         return key.get()
@@ -74,7 +81,7 @@ def _populate_model(entity):
 def _populate_entity(model):
     """
     Populate a ndb entity from a model
-    TODO: This doesn't currently support setting key on create
+    TODO: This doesn't currently support setting key on create, which is probably ok
     """
     data = {'user_id': model.user_id,
             'item_id': model.item_id,
@@ -88,53 +95,67 @@ def _populate_entity(model):
     return PreferenceEntity(**data)
 
 
-def query_preference_models(*args, **kwargs):
+def query_preference_models(cursor=None, *args, **kwargs):
     """
     Query for a set of collection models
-    TODO: Needs pagination, search terms, etc
+    Returns a 3-tuple of (domain models, opaque cursor str, bool more)
     """
-    entities = _query_preference_entities(*args, **kwargs)
+
+    # Convert opaque cursor str to native appengine cursor
+    if cursor:
+        kwargs['cursor'] = Cursor(urlsafe=cursor)
+
+    entities, next_cursor, more = _query_preference_entities(*args, **kwargs)
 
     # Hydrate models to return to service layer
     models = []
     for e in entities:
         models.append(_populate_model(e))
 
-    return models
+    # Convert native cursor to opaque str
+    if next_cursor:
+        next_cursor = next_cursor.urlsafe()
+
+    return models, next_cursor, more
 
 
-def _query_preference_entities(*args, **kwargs):
+def _query_preference_entities(limit=DEFAULT_QUERY_LIMIT, cursor=None, *args, **kwargs):
     """
     Query for preference entities
     """
-    # TODO: Beef this up quite a bit
-    # TODO: Conditionally case to Models...
-    # TODO: This doesn't currently have unit tests around it
+
+    if not limit:
+        limit = DEFAULT_QUERY_LIMIT
 
     q = PreferenceEntity.query()
     if (kwargs.get('user_id', None)):
         q = q.filter(PreferenceEntity.user_id == kwargs.get('user_id'))
 
     q = q.order(-PreferenceEntity.synced_timestamp)
-    entities = q.fetch(1000)
-    return entities
+
+    entites, cursor, more = q.fetch_page(limit, start_cursor=cursor)
+    return entites, cursor, more
 
 
 def get_txn_data():
     """
-    Query for all preferences and group into transaction list format
+    Batch query for all preferences and group into transaction list format
+    Note: This by passes models for speed and thus cursor is native db cursor
 
     {'session_id': ['Peanut Butter:0', 'Beer:1', 'Jelly:1', Bread:2']}
     """
 
+    next_cursor = None
     txn_sets_map = {}
+    more = True
 
-    # Fetch data iterator for preference entities
-    preference_entities = _query_preference_entities()
-
-    for pref in preference_entities:
-        if pref.user_id not in txn_sets_map:
-            txn_sets_map[pref.user_id] = set()
-        txn_sets_map[pref.user_id].add(pref.get_rule_item_id())
+    while(more):
+        # Fetch data iterator for preference entities
+        preference_entities, next_cursor, more = _query_preference_entities(limit=BATCH_SIZE,
+                                                                            cursor=next_cursor)
+        for pref in preference_entities:
+            if pref.user_id not in txn_sets_map:
+                txn_sets_map[pref.user_id] = set()
+            txn_sets_map[pref.user_id].add(pref.get_rule_item_id())
 
     return txn_sets_map.values()
