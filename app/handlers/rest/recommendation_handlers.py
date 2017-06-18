@@ -6,6 +6,7 @@ from rest_core.resources import Resource
 from rest_core.resources import RestField
 from rest_core.resources import ResourceIdField
 from rest_core.resources import ResourceUrlField
+from rest_core.resources import BooleanField
 
 from rest_core.resources import DatetimeField
 
@@ -38,6 +39,7 @@ ASSOCIATION_RULE_SET_FIELDS = [
     RestField(AssociationRuleSetModel.min_confidence, output_only=True),
     RestField(AssociationRuleSetModel.min_support, output_only=True),
     RestField(AssociationRuleSetModel.total_rules, output_only=True),
+    BooleanField(AssociationRuleSetModel.is_default, output_only=True),
     DatetimeField(AssociationRuleSetModel.created_timestamp, output_only=True, verbose_only=True),
 ]
 
@@ -81,6 +83,16 @@ class RuleSetDetailHandler(RuleSetHandler):
         resource = self.model_to_rest_resource(model, True)
         self.serve_success(resource)
 
+    def put(self, ruleset_id):
+        # Make an association ruleset default
+        model = rule_service.get_rule_set(ruleset_id)
+        if not model:
+            raise Exception("Ruleset does not exist")
+
+        model = rule_service.designate_default(model)
+        resource = self.model_to_rest_resource(model, True)
+        self.serve_success(resource)
+
 
 class RuleSetCollectionHandler(RuleSetHandler):
 
@@ -90,6 +102,7 @@ class RuleSetCollectionHandler(RuleSetHandler):
         return {
             u'min_confidence': voluptuous.Coerce(float),
             u'min_support': voluptuous.Coerce(float),
+            u'make_default': voluptuous.Coerce(voluptuous.Boolean()),
             u'limit': voluptuous.Coerce(int),
             u'cursor': voluptuous.Coerce(str),
         }
@@ -97,8 +110,8 @@ class RuleSetCollectionHandler(RuleSetHandler):
     def post(self):
         """
         Generate Rules
-        TODO: Make this an async process
         """
+        make_default = self.cleaned_params.get('make_default', False)
         min_support = self.cleaned_params.get('min_support', DEFAULT_MIN_SUPPORT)
         min_confidence = self.cleaned_params.get('min_confidence', DEFAULT_MIN_CONFIDENCE)
 
@@ -107,14 +120,14 @@ class RuleSetCollectionHandler(RuleSetHandler):
 
         # Generate the rules for the set
         rule_service.generate_association_rules_async(ruleset_model.id, min_support,
-                                                      min_confidence)
+                                                      min_confidence, make_default)
 
         # Return the ruleset
         self.serve_success(self.model_to_rest_resource(ruleset_model,
                                                        self.cleaned_params.get('verbose')))
 
     def get(self):
-        # Return a paginated set of association rules
+        # Return a paginated list of association rule sets
         return_resources = []
         is_verbose = self.cleaned_params.get('verbose')
 
@@ -164,10 +177,16 @@ class RecommendationCollectionHandler(RecommendationsHandlerBase):
             ruleset_id = self.cleaned_params['ruleset_id']
         else:
             # TODO: None check... return default rules?
-            rules = rule_service.query_rule_sets()
-            if len(rules) == 0:
+            rulessets, cursor, more = rule_service.query_rule_sets()
+            if len(rulessets) == 0:
                 raise Exception("There are no rulesets generated. TODO: smart defaults?")
-            ruleset_id = rules[0].id
+
+            # TODO: Adding an index on is_default might be more scalable here
+            ruleset_id = rulessets[0].id  # default to latest
+            for r in rulessets:
+                if r.is_default:
+                    ruleset_id = r.id
+                    break
 
         # Query for the rule models by ruleset_id
         kwargs = {
@@ -287,6 +306,7 @@ class SyncHandler(handlers.RestHandlerBase):
 
     def put(self):
         """ Temp debug bit to generate Preference data"""
+        raise Exception('This is disbled')
         u = 0
         models_to_put = []
         for txn in dataset.data2:

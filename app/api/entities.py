@@ -35,3 +35,4 @@ class AssociationRuleSetEntity(ndb.Model):
     min_support = ndb.FloatProperty()  # range of [0, 1]
     total_rules = ndb.IntegerProperty()
     created_timestamp = ndb.DateTimeProperty(auto_now_add=True)
+    is_default = ndb.BooleanProperty()  # Is the default ruleset

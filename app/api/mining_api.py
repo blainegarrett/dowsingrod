@@ -67,6 +67,7 @@ def _populate_ruleset_model(entity):
     m = AssociationRuleSetModel(entity.min_support, entity.min_confidence)
     m.created_timestamp = entity.created_timestamp
     m.total_rules = entity.total_rules
+    m.is_default = entity.is_default
     m.id = get_resource_id_from_key(entity.key)
     return m
 
@@ -77,9 +78,10 @@ def _populate_ruleset_entity(model):
     """
     data = {
         'min_support': model.min_support,
-        'min_confidence': model.min_support,
+        'min_confidence': model.min_confidence,
         'created_timestamp': model.created_timestamp,
         'total_rules': model.total_rules,
+        'is_default': model.is_default
     }
 
     if model.id:
@@ -88,7 +90,6 @@ def _populate_ruleset_entity(model):
 
 
 def create_ruleset(min_support, min_confidence):
-    # TODO: Move to api layer
     e = AssociationRuleSetEntity()
     e.min_support = min_support
     e.min_confidence = min_confidence

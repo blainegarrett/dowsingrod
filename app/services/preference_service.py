@@ -27,6 +27,14 @@ def record_preference(preference_models):
     # Iterate over all the persistance models and convert to ndb models
     preference_models = preference_api.create_multi(preference_models)
 
+
+    # Update item histogram
+    # transaction_service.record_preference(preference_models)
+    # fire off deferred task to update
+
+    # Update user txn data
+    # items_service.record_preference(preference_models)
+
     if (is_single):
         return preference_models[0]
     return preference_models

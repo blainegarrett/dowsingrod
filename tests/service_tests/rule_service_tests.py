@@ -30,13 +30,15 @@ class GenerateAssociationRulesTests(RulesServiceTestsBase):
 
         min_support = .2
         min_confidence = .7
+        make_default = True
 
         # Generate Ruleset
         ruleset_model = rule_service.create_ruleset(min_support, min_confidence)
 
         result = rule_service.generate_association_rules(ruleset_model.id,
                                                          min_support,
-                                                         min_confidence)
+                                                         min_confidence,
+                                                         make_default)
         self.assertTrue(result)
 
         # Check generated results
@@ -44,8 +46,8 @@ class GenerateAssociationRulesTests(RulesServiceTestsBase):
 
         self.assertEqual(len(result), 31)
         # Check aspects of the result... note: this is ordered by confidence so could be "random"
-        #self.assertEqual(result[0].ant, [u'Butter:1', u'Peanut Butter:1'])
-        #self.assertEqual(result[0].con,  [u'Bread:1'])
+        # self.assertEqual(result[0].ant, [u'Butter:1', u'Peanut Butter:1'])
+        # self.assertEqual(result[0].con,  [u'Bread:1'])
         self.assertEqual(result[0].confidence, 1.0)
         self.assertEqual(result[0].ruleset_id, ruleset_model.id)
 

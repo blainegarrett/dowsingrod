@@ -1,3 +1,4 @@
+from google.appengine.ext import ndb  # TODO: Refactor this out
 from api import mining_api
 from api import preference_api
 from furious.async import Async
@@ -27,14 +28,14 @@ def delete_rules():
     return mining_api.delete_rules()
 
 
-def generate_association_rules_async(ruleset_id, min_support, min_confidence):
+def generate_association_rules_async(ruleset_id, min_support, min_confidence, make_default):
     logging.info("Enqueuing generate_association_rules")
     async = Async(target='services.rule_service.generate_association_rules',
-                  args=(ruleset_id, min_support, min_confidence))
+                  args=(ruleset_id, min_support, min_confidence, make_default))
     async.start()
 
 
-def generate_association_rules(ruleset_id, min_support, min_confidence):
+def generate_association_rules(ruleset_id, min_support, min_confidence, make_default):
     """
     Process to generate association rules
     """
@@ -54,15 +55,47 @@ def generate_association_rules(ruleset_id, min_support, min_confidence):
     ruleset_model = mining_api.get_ruleset_by_id(ruleset_id)
 
     # TODO: THIS SHOULD HAPPEN in the api layer
-    e = mining_api._populate_ruleset_entity(ruleset_model)
-    e.total_rules = len(rule_models)
-    e.put()
+    ruleset_model.total_rules = len(rule_models)
+    if make_default:
+        designate_default(ruleset_model)
+    else:
+        e = mining_api._populate_ruleset_entity(ruleset_model)
+        e.put()
 
     logging.info("Completing generation of Ruleset Completed with id %s - %s - %s " % log_args)
     logging.info("New ruleset contains %s rules" % len(rule_models))
+    if (make_default):
+        logging.info("New ruleset is now default")
 
     return True
 
 
 def create_ruleset(*args, **kwargs):
     return mining_api.create_ruleset(*args, **kwargs)
+
+
+def designate_default(ruleset_model):
+    """
+    Flag a ruleset as default - mark all others as not default
+    TODO: Add a index for more efficient search
+    TODO: This should leverage models (?)
+    """
+    ruleset_entity = mining_api._populate_ruleset_entity(ruleset_model)
+
+    entities_to_update = []
+    ruleset_models, cursor, more = mining_api._query_ruleset_entities()
+    for m in ruleset_models:
+        if m.is_default:
+            m.is_default = False
+            entities_to_update.append(m)
+
+    # Update the new one
+    ruleset_entity.is_default = True
+    entities_to_update.append(ruleset_entity)  # Note: potential to overrite?
+
+    if (entities_to_update):
+        ndb.put_multi(entities_to_update)
+        # mining_api.update_rulesets(entities_to_update)
+
+    # Refresh the
+    return mining_api._populate_ruleset_model(ruleset_entity)
