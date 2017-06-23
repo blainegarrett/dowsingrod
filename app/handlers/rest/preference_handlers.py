@@ -1,5 +1,5 @@
 import voluptuous
-from rest_core import handlers
+
 from rest_core.resources import Resource
 from rest_core.resources import RestField
 from rest_core.resources import BooleanField
@@ -7,7 +7,9 @@ from rest_core.resources import DatetimeField
 from rest_core.resources import ResourceUrlField
 from rest_core.resources import ResourceIdField
 from rest_core.errors import DoesNotExistException
+from auth.decorators import authentication_required
 
+from handlers.rest import BaseRestHandler
 from services import preference_service
 from models import PreferenceModel
 
@@ -23,7 +25,7 @@ PREFERENCE_FIELDS = [
 ]
 
 
-class PreferenceBaseHandler(handlers.RestHandlerBase):
+class PreferenceBaseHandler(BaseRestHandler):
     """
     Base Handler for Preferences
     """
@@ -35,6 +37,7 @@ class PreferenceBaseHandler(handlers.RestHandlerBase):
         """
         Fetch a model by given id OR implicitly raise a 404
         """
+
         m = preference_service.get_by_id(resource_id)
 
         if not m:
@@ -51,6 +54,7 @@ class PreferenceDetailHandler(PreferenceBaseHandler):
     """
     Handler for a single Preference
     """
+    @authentication_required
     def get(self, resource_id):
         pref_model = self.get_model_by_id_or_error(resource_id)
         result = self.model_to_rest_resource(pref_model,
@@ -69,8 +73,8 @@ class PreferenceCollectionHandler(PreferenceBaseHandler):
             u'cursor': voluptuous.Coerce(str),
         }
 
+    @authentication_required
     def get(self):
-
         kwargs = {
             'limit': self.cleaned_params.get('limit', None),
             'cursor': self.cleaned_params.get('cursor', None)
@@ -97,6 +101,7 @@ class PreferenceCollectionHandler(PreferenceBaseHandler):
         for d in self.data:
             self.cleaned_data.append(Resource(None, PREFERENCE_FIELDS).from_dict(d))
 
+    @authentication_required
     def post(self):
         models = []
         return_resources = []

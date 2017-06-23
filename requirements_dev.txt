@@ -1,4 +1,4 @@
-git+https://github.com/ze-phyr-us/linkenv.git
+# These requirements are installed to virtual env and not deployed
 mock
 nose
 nose-exclude
@@ -6,4 +6,4 @@ rednose
 coverage
 git+https://github.com/Trii/NoseGAE.git
 yanc
--r requirements.txt
+PyCrypto==2.6

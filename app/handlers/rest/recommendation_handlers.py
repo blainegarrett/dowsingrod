@@ -1,7 +1,7 @@
 import voluptuous
 import itertools
 import logging
-from rest_core import handlers
+from handlers.rest import BaseRestHandler
 from rest_core.resources import Resource
 from rest_core.resources import RestField
 from rest_core.resources import ResourceIdField
@@ -17,6 +17,7 @@ from models import AssociationRuleSetModel
 from services import rule_service
 from services import preference_service
 from handlers.rest import dataset
+from auth.decorators import authentication_required
 
 
 # Default Support and Confidence
@@ -61,7 +62,7 @@ def generate_rule_key(ant):
     return '__'.join(cleaned_items)
 
 
-class RuleSetHandler(handlers.RestHandlerBase):
+class RuleSetHandler(BaseRestHandler):
     """
     Base Handler for Non-api calls
     """
@@ -75,6 +76,7 @@ class RuleSetHandler(handlers.RestHandlerBase):
 
 
 class RuleSetDetailHandler(RuleSetHandler):
+    @authentication_required
     def get(self, ruleset_id):
         """
         Fetch a ruleset by id
@@ -83,6 +85,7 @@ class RuleSetDetailHandler(RuleSetHandler):
         resource = self.model_to_rest_resource(model, True)
         self.serve_success(resource)
 
+    @authentication_required
     def put(self, ruleset_id):
         # Make an association ruleset default
         model = rule_service.get_rule_set(ruleset_id)
@@ -107,6 +110,7 @@ class RuleSetCollectionHandler(RuleSetHandler):
             u'cursor': voluptuous.Coerce(str),
         }
 
+    @authentication_required
     def post(self):
         """
         Generate Rules
@@ -126,6 +130,7 @@ class RuleSetCollectionHandler(RuleSetHandler):
         self.serve_success(self.model_to_rest_resource(ruleset_model,
                                                        self.cleaned_params.get('verbose')))
 
+    @authentication_required
     def get(self):
         # Return a paginated list of association rule sets
         return_resources = []
@@ -142,7 +147,7 @@ class RuleSetCollectionHandler(RuleSetHandler):
 
 
 # Association Rules
-class RecommendationsHandlerBase(handlers.RestHandlerBase):
+class RecommendationsHandlerBase(BaseRestHandler):
     """
     Base Handler for Non-api calls
     """
@@ -167,6 +172,7 @@ class RecommendationCollectionHandler(RecommendationsHandlerBase):
             u'cursor': voluptuous.Coerce(str),
         }
 
+    @authentication_required
     def get(self):
         """
         Retrieve a set of rules based on a generated AssociationRuleSet
@@ -275,6 +281,7 @@ class RecommendationForUserHandler(RecommendationsHandlerBase):
             'ruleset_id': voluptuous.Coerce(str),
         }
 
+    @authentication_required
     def get(self, user_id):
         """
         Retrieve a set of rules based on a generated AssociationRuleSet
@@ -286,7 +293,7 @@ class RecommendationForUserHandler(RecommendationsHandlerBase):
         self.serve_success(return_resources)
 
 
-class SyncHandler(handlers.RestHandlerBase):
+class SyncHandler(BaseRestHandler):
 
     def get_param_schema(self):
         # Validators for schema
@@ -304,6 +311,7 @@ class SyncHandler(handlers.RestHandlerBase):
         """Convert a AssociationRuleModel to a Rest Resource (dict)"""
         return Resource(model, ASSOCIATION_RULES_FIELDS).to_dict(verbose)
 
+    @authentication_required
     def put(self):
         """ Temp debug bit to generate Preference data"""
         raise Exception('This is disbled')
@@ -316,6 +324,7 @@ class SyncHandler(handlers.RestHandlerBase):
         preference_service.record_preference(models_to_put)
         self.serve_success('now run a POST')
 
+    @authentication_required
     def delete(self):
         """
         Clear out the stale association rules
