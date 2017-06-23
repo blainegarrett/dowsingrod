@@ -20,43 +20,43 @@ def handle_404(request, response, exception):
 # Define routes
 web_routes = [
     RedirectRoute('/api/rest/v1.0/rulesets',
-                  'handlers.rest.recommendation_handlers.RuleSetCollectionHandler',
+                  'handlers.rest.v1_0.recommendation_handlers.RuleSetCollectionHandler',
                   strict_slash=True,
                   name="RuleSetCollectionHandler"),
 
     RedirectRoute('/api/rest/v1.0/rulesets/<ruleset_id>',
-                  'handlers.rest.recommendation_handlers.RuleSetDetailHandler',
+                  'handlers.rest.v1_0.recommendation_handlers.RuleSetDetailHandler',
                   strict_slash=True,
                   name="RuleSetCollectionHandler"),
 
 
     RedirectRoute('/api/rest/v1.0/recommendations',
-                  'handlers.rest.recommendation_handlers.RecommendationCollectionHandler',
+                  'handlers.rest.v1_0.recommendation_handlers.RecommendationCollectionHandler',
                   strict_slash=True,
                   name="RecommendationsHandler"),
 
     RedirectRoute('/api/rest/v1.0/recommendations/<user_id>',
-                  'handlers.rest.recommendation_handlers.RecommendationForUserHandler',
+                  'handlers.rest.v1_0.recommendation_handlers.RecommendationForUserHandler',
                   strict_slash=True,
                   name="RecommendationForUserHandler"),
 
     RedirectRoute('/api/rest/v1.0/preferences/list',
-                  'handlers.rest.preference_handlers.PreferenceListHandler',
+                  'handlers.rest.v1_0.preference_handlers.PreferenceListHandler',
                   strict_slash=True,
                   name="PreferenceCollectionHandler"),
 
 
     RedirectRoute('/api/rest/v1.0/preferences/<resource_id:\w+>',
-                  'handlers.rest.preference_handlers.PreferenceDetailHandler',
+                  'handlers.rest.v1_0.preference_handlers.PreferenceDetailHandler',
                   strict_slash=True,
                   name="PreferenceDetailHandler"),
     RedirectRoute('/api/rest/v1.0/preferences',
-                  'handlers.rest.preference_handlers.PreferenceCollectionHandler',
+                  'handlers.rest.v1_0.preference_handlers.PreferenceCollectionHandler',
                   strict_slash=True,
                   name="PreferenceCollectionHandler"),
 
     RedirectRoute('/api/rest/v1.0/sync',
-                  'handlers.rest.recommendation_handlers.SyncHandler',
+                  'handlers.rest.v1_0.recommendation_handlers.SyncHandler',
                   strict_slash=True,
                   name="SyncHandler"),
 

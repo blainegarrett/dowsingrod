@@ -64,6 +64,9 @@ def query_ruleset_models(cursor=None, *args, **kwargs):
 
 
 def _populate_ruleset_model(entity):
+    if not entity:
+        return None
+
     m = AssociationRuleSetModel(entity.min_support, entity.min_confidence)
     m.created_timestamp = entity.created_timestamp
     m.total_rules = entity.total_rules
@@ -76,6 +79,9 @@ def _populate_ruleset_entity(model):
     """
     Populate a ndb entity from a model
     """
+    if not model:
+        return None
+
     data = {
         'min_support': model.min_support,
         'min_confidence': model.min_confidence,
