@@ -60,6 +60,12 @@ web_routes = [
                   strict_slash=True,
                   name="SyncHandler"),
 
+    RedirectRoute('/api/auth/authenticate',
+                  'auth.handlers.AuthenticationHandler',
+                  strict_slash=True,
+                  name="AuthenticationHandler"),
+
+
 
     ]
 app = webapp2.WSGIApplication(web_routes, debug=True)
