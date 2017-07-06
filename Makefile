@@ -10,6 +10,9 @@ clean:
 	find . -name '*~' -exec rm -f {} +
 
 install:
+	@echo "Attempting to create GAE local datastore directory"
+	[ -d ./data ] && echo "FYI: Dir Exists" || mkdir ./data
+
 	pip install -Ur requirements_dev.txt
 	pip install -Ur requirements.txt -t app/external
 	@echo "Requirements installed."
