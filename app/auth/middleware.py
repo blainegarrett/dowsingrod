@@ -1,7 +1,6 @@
 import logging
-from auth import helpers as auth_helpers
-from auth import exceptions as auth_exceptions
-from rest_core import errors as rest_exceptions
+from auth_core import get_user_from_request
+from auth_core import AuthenticationException
 
 
 class AuthenticationMiddleware(object):
@@ -9,8 +8,8 @@ class AuthenticationMiddleware(object):
     def process_request(request):
 
         try:
-            user = auth_helpers.get_user_from_request(request)
+            user = get_user_from_request(request)
             setattr(request, '_user', user)
-        except auth_exceptions.AuthenticationError, e:
+        except AuthenticationException, e:
             logging.error(e)
-            raise rest_exceptions.AuthenticationException("Authentication Failed")
+            raise AuthenticationException("Authentication Failed")

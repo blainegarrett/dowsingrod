@@ -1,13 +1,12 @@
-import webapp2
 import json
 import main
-from tests import BaseCase
+from tests.handler_tests import AuthenticatedHandlerTestsBase
 from tests import dataset
 from models import PreferenceModel
 from services import preference_service
 
 
-class RecommendationHandlerTestsBase(BaseCase):
+class RecommendationHandlerTestsBase(AuthenticatedHandlerTestsBase):
     pass
 
 
@@ -16,7 +15,7 @@ class RuleSetDetailHandlerTests(RecommendationHandlerTestsBase):
 
         # Generate a ruleset
         url = '/api/rest/v1.0/rulesets?min_confidence=.345&min_support=.45&verbose=true'
-        request = webapp2.Request.blank(url)
+        request = self.get_authenticated_request(url)
         request.method = 'POST'
         request.content_type = 'application/json'
 
@@ -31,7 +30,7 @@ class RuleSetDetailHandlerTests(RecommendationHandlerTestsBase):
 
         # Fetch the ruleset we just created
         url = '/api/rest/v1.0/rulesets/%s' % result['results']['resource_id']
-        request = webapp2.Request.blank(url)
+        request = self.get_authenticated_request(url)
         request.method = 'GET'
         request.content_type = 'application/json'
 
@@ -50,7 +49,7 @@ class RuleSetDetailHandlerTests(RecommendationHandlerTestsBase):
 class RuleSetCollectionHandlerTests(RecommendationHandlerTestsBase):
     def test_empty_get(self):
 
-        request = webapp2.Request.blank('/api/rest/v1.0/rulesets?verbose=true')
+        request = self.get_authenticated_request('/api/rest/v1.0/rulesets?verbose=true')
         #   Get a response for that request.
         response = request.get_response(main.app)
 
@@ -59,7 +58,7 @@ class RuleSetCollectionHandlerTests(RecommendationHandlerTestsBase):
 
     def test_post(self):
         # Generate Ruleset
-        request = webapp2.Request.blank('/api/rest/v1.0/rulesets?verbose=true')
+        request = self.get_authenticated_request('/api/rest/v1.0/rulesets?verbose=true')
         request.method = 'POST'
         request.content_type = 'application/json'
 
@@ -76,7 +75,7 @@ class RuleSetCollectionHandlerTests(RecommendationHandlerTestsBase):
     def test_post_with_params(self):
         # Generate Ruleset with min requirements
         url = '/api/rest/v1.0/rulesets?min_confidence=.345&min_support=.45&verbose=true'
-        request = webapp2.Request.blank(url)
+        request = self.get_authenticated_request(url)
         request.method = 'POST'
         request.content_type = 'application/json'
 
@@ -108,7 +107,7 @@ class AssociationRulesCollectionHandlerTests(RecommendationHandlerTestsBase):
 
         # Generate 2 association rule sets on the same data with different confidence
         url = '/api/rest/v1.0/rulesets?min_confidence=.1&min_support=.1&verbose=true'
-        request = webapp2.Request.blank(url)
+        request = self.get_authenticated_request(url)
         request.method = 'POST'
         request.content_type = 'application/json'
         response = request.get_response(main.app)
@@ -118,7 +117,7 @@ class AssociationRulesCollectionHandlerTests(RecommendationHandlerTestsBase):
         self.ruleset_id1 = result['results']['resource_id']
 
         url = '/api/rest/v1.0/rulesets?min_confidence=.70&min_support=.45&verbose=true'
-        request = webapp2.Request.blank(url)
+        request = self.get_authenticated_request(url)
         request.method = 'POST'
         request.content_type = 'application/json'
         response = request.get_response(main.app)

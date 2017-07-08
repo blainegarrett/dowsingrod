@@ -1,7 +1,7 @@
 """
 Simple Decorators for Auth System
 """
-from rest_core.errors import PermissionException
+from auth_core import PermissionException
 from auth_settings import REQUIRE_AUTHENTICATION
 
 

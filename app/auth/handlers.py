@@ -1,8 +1,7 @@
+import auth_core
 from rest_core import handlers
-from rest_core.resources import Resource
 from rest_core.resources import RestField
 
-from auth import helpers
 
 class BaseAuthHandler(handlers.RestHandlerBase):
     """
@@ -16,6 +15,7 @@ AUTH_FIELDS = [
     RestField('auth_type', required=True),
     RestField('auth_token', required=True),
 ]
+
 
 class AuthenticationHandler(BaseAuthHandler):
     """
@@ -33,12 +33,13 @@ class AuthenticationHandler(BaseAuthHandler):
         """
 
         # Step 1: Authenticate the user get the associated login. Throws AuthenticationException
-        user, login = helpers.get_user_by_auth_attempt(self.cleaned_data['auth_type'],
-                                                       self.cleaned_data['auth_token'])
+        auth_type = self.cleaned_data['auth_type']
+        auth_token = self.cleaned_data['auth_token']
+
+        user, login = auth_core.authenticate(auth_type, auth_token)
 
         # Step 2: Create a access_token for this user
-        user_payload = helpers.get_access_token_payload_for_user(user, login)
-        access_token = helpers.make_access_token(user_payload) # returns a jwt token
+        access_token = auth_core.get_access_token_for_user_and_login(user, login)
 
         # TODO: Return basic profile information
         result = {'id_token': 'not_in_use', 'access_token': access_token}

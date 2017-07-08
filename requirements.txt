@@ -3,6 +3,8 @@
 pytz
 voluptuous
 git+git://github.com/Workiva/furious.git#egg=furious
-git+https://github.com/blainegarrett/rest-core@0.0.4-alpha#egg=rest-core
-#git+https://github.com/blainegarrett/rest-core@master#egg=rest-core
+#git+https://github.com/digibodies/rest_core@0.0.4-alpha#egg=rest_core
+git+https://github.com/digibodies/rest_core@master#egg=rest_core
+git+https://github.com/digibodies/auth_core@master#egg=auth_core
+git+git://github.com/digibodies/core.git@master#egg=core
 PyJWT

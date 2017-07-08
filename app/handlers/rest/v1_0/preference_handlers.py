@@ -6,7 +6,7 @@ from rest_core.resources import BooleanField
 from rest_core.resources import DatetimeField
 from rest_core.resources import ResourceUrlField
 from rest_core.resources import ResourceIdField
-from rest_core.errors import DoesNotExistException
+from rest_core.exc import DoesNotExistException
 from auth.decorators import authentication_required
 
 from handlers.rest import BaseRestHandler
