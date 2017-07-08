@@ -45,4 +45,3 @@ class AuthenticationHandler(BaseAuthHandler):
         result = {'id_token': 'not_in_use', 'access_token': access_token}
         self.serve_success(result)
         return
-
