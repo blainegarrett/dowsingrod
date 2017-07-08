@@ -17,7 +17,7 @@ from models import AssociationRuleSetModel
 from services import rule_service
 from services import preference_service
 from handlers.rest import dataset
-from auth.decorators import authentication_required
+from auth_core.decorators import authentication_required
 
 
 # Default Support and Confidence

@@ -7,7 +7,7 @@ from rest_core.resources import DatetimeField
 from rest_core.resources import ResourceUrlField
 from rest_core.resources import ResourceIdField
 from rest_core.exc import DoesNotExistException
-from auth.decorators import authentication_required
+from auth_core.decorators import authentication_required
 
 from handlers.rest import BaseRestHandler
 from services import preference_service
