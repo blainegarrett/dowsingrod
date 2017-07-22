@@ -65,7 +65,15 @@ web_routes = [
                   strict_slash=True,
                   name="AuthenticationHandler"),
 
+    RedirectRoute('/api/auth/users',
+                  'auth.handlers.UsersCollectionHandler',
+                  strict_slash=True,
+                  name="UsersCollectionHandler"),
 
+    RedirectRoute('/api/auth/users/<user_resource_id:\w+>',
+                  'auth.handlers.UserResourceHandler',
+                  strict_slash=True,
+                  name="UserResourceHandler"),
 
     ]
 app = webapp2.WSGIApplication(web_routes, debug=True)
