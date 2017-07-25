@@ -236,6 +236,8 @@ class UserLoginsResourceHandler(UserLoginsBaseHandler):
 
         # Get the target login model
         login_model = logins_service.get_login_by_id(login_resource_id)
+        if not login_model:
+            raise DoesNotExistException("Login does not exist.")
 
         # Ensure the login belongs to the user
         if not login_model.user_resource_id == user_model.id:
@@ -258,6 +260,8 @@ class UserLoginsResourceHandler(UserLoginsBaseHandler):
 
         # Get the target login model
         login_model = logins_service.get_login_by_id(login_resource_id)
+        if not login_model:
+            raise DoesNotExistException("Login does not exist.")
 
         # Ensure the login belongs to the user
         if not login_model.user_resource_id == user_model.id:
