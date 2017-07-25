@@ -2,11 +2,16 @@ import auth_core
 import voluptuous
 from auth_core.decorators import authentication_required
 from auth_core.services import users_service
+from auth_core.services import logins_service
+from auth_core import DuplicateCredentials
+
 from rest_core import handlers
 from rest_core.resources import RestField
 from rest_core.resources import ResourceIdField
 from rest_core.resources import Resource
 from rest_core.exc import DoesNotExistException
+from rest_core.exc import BadRequestException
+
 
 # Fields for Authentication
 AUTH_FIELDS = [
@@ -22,6 +27,13 @@ AUTH_USER_REST_RULES = [
     RestField(auth_core.AuthUser.username, required=False),
     RestField(auth_core.AuthUser.email, required=False),
     RestField(auth_core.AuthUser.is_activated, required=False),
+]
+
+AUTH_METHOD_REST_RULES = [
+    ResourceIdField(output_only=True),
+    RestField(auth_core.AuthUserMethod.auth_type, required=True),
+    RestField(auth_core.AuthUserMethod.auth_key, required=True),
+    RestField(auth_core.AuthUserMethod.auth_data, required=False),
 ]
 
 
@@ -71,29 +83,44 @@ class UsersCollectionHandler(handlers.RestHandlerBase):
 
     @authentication_required
     def get(self):
-
+        """
+        Fetch a paginated list of users
+        """
         cursor = self.cleaned_params.get('cursor')
         limit = self.cleaned_params.get('limit')
 
-        entities, next_cursor, more = users_service.get_auth_users(limit=limit, cursor=cursor)
+        user_models, next_cursor, more = users_service.get_auth_users(limit=limit, cursor=cursor)
 
-        # Create A set of results based upon this result set - iterator??
+        # Create A set of results based upon this result set
         return_resources = []
-        for e in entities:
-            return_resources.append(Resource(e, AUTH_USER_REST_RULES).to_dict())
+        for user_model in user_models:
+            return_resources.append(Resource(user_model, AUTH_USER_REST_RULES).to_dict())
         self.serve_success(return_resources, {'cursor': next_cursor, 'more': more})
 
     @authentication_required
     def post(self):
         """
         Create a User
-        Note: This does not create a Login ... yet?
+        Note: This does not create a login for the user
         """
-        e = users_service.create_auth_user(self.cleaned_data)
-        self.serve_success(Resource(e, AUTH_USER_REST_RULES).to_dict())
+
+        user_model = users_service.create_auth_user(self.cleaned_data)
+        self.serve_success(Resource(user_model, AUTH_USER_REST_RULES).to_dict())
 
 
-class UserResourceHandler(handlers.RestHandlerBase):
+class UserBaseHandler(handlers.RestHandlerBase):
+    def get_user_or_404(self, user_resource_id):
+        """
+        Helper to resolve a user or throw a 404
+        """
+
+        user_model = users_service.get_by_id(user_resource_id)
+        if not user_model:
+            raise DoesNotExistException("Could not find user with id %s" % user_resource_id)
+        return user_model
+
+
+class UserResourceHandler(UserBaseHandler):
     """
     User Resource REST Endpoint
     Accessible via: /api/auth/users/<resource_id> (see main.py)
@@ -108,10 +135,10 @@ class UserResourceHandler(handlers.RestHandlerBase):
         Return an authuser resource given by user_resource_id
         """
 
-        user = self._get_model_by_id_or_error(user_resource_id)
+        user_model = self.get_user_or_404(user_resource_id)
 
         # Convert to Rest Resource
-        self.serve_success(Resource(user, AUTH_USER_REST_RULES).to_dict())
+        self.serve_success(Resource(user_model, AUTH_USER_REST_RULES).to_dict())
 
     @authentication_required
     def put(self, user_resource_id):
@@ -120,18 +147,127 @@ class UserResourceHandler(handlers.RestHandlerBase):
         Note: This does not update the Login, yet...
         """
 
-        user = self._get_model_by_id_or_error(user_resource_id)
-        user = users_service.update_user(user, self.cleaned_data)
+        user_model = self.get_user_or_404(user_resource_id)
+
+        user_model = users_service.update_user(user_model, self.cleaned_data)
 
         # Convert to Rest Resource
-        self.serve_success(Resource(user, AUTH_USER_REST_RULES).to_dict())
+        self.serve_success(Resource(user_model, AUTH_USER_REST_RULES).to_dict())
 
-    def _get_model_by_id_or_error(self, user_resource_id):
+
+class UserLoginsBaseHandler(UserBaseHandler):
+
+    def create_sanitized_resource(self, login_model):
         """
-        Resolve an auth_user by id or throw a 404
+        Given a login model, convert to REST resource and clean up sensitive fields
         """
 
-        user = users_service.get_by_id(user_resource_id)
-        if not user:
-            raise DoesNotExistException("Could not find user with id %s" % user_resource_id)
-        return user
+        resource = Resource(login_model, AUTH_METHOD_REST_RULES).to_dict()
+
+        # TODO: Maybe just delete the key?
+        resource['auth_data'] = '--redacted--'
+        return resource
+
+
+class UserLoginsCollectionHandler(UserLoginsBaseHandler):
+    """
+    Handler for accessing a user'a login
+    Accessible via: /api/auth/users/<user_resource_id>/logins (see main.py)
+    """
+    def get_rules(self):
+        return AUTH_METHOD_REST_RULES
+
+    @authentication_required
+    def post(self, user_resource_id):
+        """
+        Create a new Login for a given user
+        Note: If there is already a login for the combo of user, type, auth_key this will error
+        """
+
+        # Ensure User exists
+        user_model = self.get_user_or_404(user_resource_id)
+
+        # TODO: Catch all the potential errors - duplicate == badrequest'
+        try:
+            login_model = logins_service.create_login(user_model.id, self.cleaned_data)
+        except DuplicateCredentials, e:
+            raise BadRequestException(e)
+
+        # Serve up results
+        self.serve_success(self.create_sanitized_resource(login_model))
+
+    @authentication_required
+    def get(self, user_resource_id):
+        """
+        Fetch all logins for a given
+        """
+
+        # Ensure User exists
+        user_model = self.get_user_or_404(user_resource_id)
+
+        # Fetch all logins for this user
+        login_models = logins_service.get_logins_for_user(user_model.id)
+
+        # Serve up Results
+        return_resources = []
+        for login_model in login_models:
+            return_resources.append(self.create_sanitized_resource(login_model))
+
+        self.serve_success(return_resources)
+
+
+class UserLoginsResourceHandler(UserLoginsBaseHandler):
+    """
+    Handler for accessing a specific user login
+    Accessible via: /api/auth/users/<user_resource_id>/logins/<login_resource_id> (see main.py)
+    """
+
+    def get_rules(self):
+        return AUTH_METHOD_REST_RULES
+
+    @authentication_required
+    def get(self, user_resource_id, login_resource_id):
+        """
+        Fetch a specific login for a given user
+        """
+
+        # Ensure User exists
+        user_model = self.get_user_or_404(user_resource_id)
+
+        # Get the target login model
+        login_model = logins_service.get_login_by_id(login_resource_id)
+
+        # Ensure the login belongs to the user
+        if not login_model.user_resource_id == user_model.id:
+            raise BadRequestException("Login does not belong to this user.")
+
+        # Serve up results
+        self.serve_success(self.create_sanitized_resource(login_model))
+
+    @authentication_required
+    def put(self, user_resource_id, login_resource_id):
+        """
+        Update a login for a given user
+        Note: This is used to change password, etc
+            - the auth_data field should be the raw password on the incomming request
+        """
+        # Note: auth_type, auth_key, etc are ignored on update TODO: Don't make required
+
+        # Ensure User exists
+        user_model = self.get_user_or_404(user_resource_id)
+
+        # Get the target login model
+        login_model = logins_service.get_login_by_id(login_resource_id)
+
+        # Ensure the login belongs to the user
+        if not login_model.user_resource_id == user_model.id:
+            raise BadRequestException("Login does not belong to this user.")
+
+        # Update it
+        try:
+            login_model = logins_service.update_login(login_model, self.cleaned_data)
+        except ValueError, e:
+            raise BadRequestException(e)
+
+        # Serve up results
+        self.serve_success(self.create_sanitized_resource(login_model))
