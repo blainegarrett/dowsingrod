@@ -3,7 +3,7 @@
 pytz
 voluptuous
 git+git://github.com/Workiva/furious.git#egg=furious
-git+https://github.com/digibodies/rest_core@v0.0.5#egg=rest_core
-git+https://github.com/digibodies/auth_core@v0.0.1#egg=auth_core
+git+https://github.com/digibodies/rest_core@v0.0.6#egg=rest_core
+git+https://github.com/digibodies/auth_core@v0.0.3#egg=auth_core
 git+https://github.com/digibodies/core.git@master#egg=core
 PyJWT

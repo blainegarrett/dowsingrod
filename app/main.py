@@ -80,6 +80,11 @@ web_routes = [
                   strict_slash=True,
                   name="UserLoginsCollectionHandler"),
 
+    RedirectRoute('/api/auth/users/<user_resource_id:\w+>/logins/password',
+                  'auth.handlers.UserLoginsPasswordHandler',
+                  strict_slash=True,
+                  name="UserLoginsPasswordHandler"),
+
     RedirectRoute('/api/auth/users/<user_resource_id:\w+>/logins/<login_resource_id:\w+>',
                   'auth.handlers.UserLoginsResourceHandler',
                   strict_slash=True,

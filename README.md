@@ -1,14 +1,17 @@
-# dowsingrod
-Server API for "dowsingrod project" reccomendation engine project
+# Divrods Preference Service
+Server API for divrods reccomendation engine
 
+## Installation Instructions
+Quick start guide to get up and running
 
-## Installation
-Note: This assumes you are running python 2.7, have pip and [virtualenv](http://virtualenvwrapper.readthedocs.io/en/latest/install.html) installed. It is untested with other environments.
-
-Also be sure to install [gcloud sdk](https://cloud.google.com/sdk/downloads).
+#### Dependencies
+* python 2.7
+* pip python package manager ([installation instructions](https://pip.pypa.io/en/stable/installing/))
+* virtualenv ([installation instruction](http://virtualenvwrapper.readthedocs.io/en/latest/install.html))
+* gcloud sdk ([installation instructions](https://cloud.google.com/sdk/downloads))
+* Also, this is this far test mostly on Mac. Your miliage may vary on other environments
 
 #### Check Out Code
-
 Clone repo from `git@github.com:blainegarrett/dowsingrod.git`
 into ~/sites/dowsingrod/ or your preferred directory
 

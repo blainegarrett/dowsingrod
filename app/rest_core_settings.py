@@ -3,6 +3,9 @@ REST_WHITELIST_DOMAINS = []
 
 REST_WHITELIST_RULES = [r'http.*//pref-service-.*.appspot.com',
                         r'htt.*://divining-admin.appspot.com',
+                        r'htt.*://divrods-admin.appspot.com',
+                        r'htt.*://.*-dot-divrods-admin.appspot.com',
+                        r'htt.*://.*-dot-divining-admin.appspot.com',
                         r'http://localhost:.*']
 
 REST_MIDDLEWARE_CLASSES = [u'auth_core.middleware.AuthenticationMiddleware', ]

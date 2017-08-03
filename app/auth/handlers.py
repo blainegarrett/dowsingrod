@@ -216,6 +216,39 @@ class UserLoginsCollectionHandler(UserLoginsBaseHandler):
         self.serve_success(return_resources)
 
 
+class UserLoginsPasswordHandler(UserLoginsBaseHandler):
+    """
+    Special Logins Handler to deal with passwords - special case
+    Accessible via: /api/auth/users/<user_resource_id>/logins/password (see main.py)
+    """
+    def get_rules(self):
+        return AUTH_METHOD_REST_RULES
+
+    @authentication_required
+    def put(self, user_resource_id):
+        """
+        Update or create password login for user
+        """
+        # Ensure User exists
+        user_model = self.get_user_or_404(user_resource_id)
+        login_model = logins_service.get_login_by_auth_data(user_model,
+                                                            "basic",
+                                                            user_model.id,
+                                                            self.cleaned_data.get('auth_data'))
+
+        if (login_model):
+            password = self.cleaned_data.get('auth_data')
+            login_model = logins_service.update_login(login_model,
+                                                      {'auth_type': 'basic',
+                                                       'auth_key': user_model.id,
+                                                       'auth_data': password})
+        else:
+            login_model = logins_service.create_login(user_model.id, self.cleaned_data)
+
+        # Serve up results
+        self.serve_success(self.create_sanitized_resource(login_model))
+
+
 class UserLoginsResourceHandler(UserLoginsBaseHandler):
     """
     Handler for accessing a specific user login
