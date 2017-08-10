@@ -42,7 +42,7 @@ def generate_association_rules(ruleset_id, min_support, min_confidence, make_def
     # TODO: This probably needs to be split up into separate async functions
     # TODO: It feels weird importing the pref_api, but we need the prefs in our specific format
     log_args = (ruleset_id, min_support, min_confidence)
-    logging.info("Starting Generation of Ruleset Completed with id %s - %s - %s " % log_args)
+    logging.info("Starting Generation of Ruleset with id %s - %s - %s " % log_args)
 
     txn_data = preference_api.get_txn_data()
 
@@ -62,7 +62,7 @@ def generate_association_rules(ruleset_id, min_support, min_confidence, make_def
         e = mining_api._populate_ruleset_entity(ruleset_model)
         e.put()
 
-    logging.info("Completing generation of Ruleset Completed with id %s - %s - %s " % log_args)
+    logging.info("Completing generation of Ruleset with id %s - %s - %s " % log_args)
     logging.info("New ruleset contains %s rules" % len(rule_models))
     if (make_default):
         logging.info("New ruleset is now default")

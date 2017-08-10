@@ -2,13 +2,14 @@
 Low level API surrounding preferences persistance
 Keep all persistance implementation in this layer and return models to service layer
 """
+import logging
 from google.appengine.ext import ndb
 from google.appengine.datastore.datastore_query import Cursor
 
 from api.entities import PreferenceEntity
 from models import PreferenceModel
 from api.constants import DEFAULT_QUERY_LIMIT
-from api.constants import BATCH_SIZE
+# from api.constants import BATCH_SIZE
 from rest_core.utils import get_resource_id_from_key, get_key_from_resource_id
 
 
@@ -148,14 +149,17 @@ def get_txn_data():
     next_cursor = None
     txn_sets_map = {}
     more = True
+    total_prefs = 0
 
-    while(more):
+    # if True:
+    while(more and total_prefs < 8000):
         # Fetch data iterator for preference entities
-        preference_entities, next_cursor, more = _query_preference_entities(limit=BATCH_SIZE,
+        preference_entities, next_cursor, more = _query_preference_entities(limit=1000,
                                                                             cursor=next_cursor)
         for pref in preference_entities:
+            total_prefs += len(preference_entities)
             if pref.user_id not in txn_sets_map:
-                txn_sets_map[pref.user_id] = set()
-            txn_sets_map[pref.user_id].add(pref.get_rule_item_id())
-
+                txn_sets_map[pref.user_id] = []  # set()
+            txn_sets_map[pref.user_id].append(pref.get_rule_item_id())
+        logging.error('Total Preferences Used: ' + str(total_prefs))
     return txn_sets_map.values()
