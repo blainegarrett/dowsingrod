@@ -111,7 +111,7 @@ resource_url | string | *verbose & output only* | restful url to resource
             "min_support": 0.45,
             "resource_id": "QXNzb2NpYXRpb25SdWxlU2V0RW50aXR5Hh81Nzk5MjM2NjQxNzUxMDQw",
             "resource_type": "AssociationRuleSetEntity",
-            "resource_url": "/api/rest/v1.0/recommendation/QXNzb2NpYXRpb25SdWxlU2V0RW50aXR5Hh81Nzk5MjM2NjQxNzUxMDQw",
+            "resource_url": "/api/rest/v1.0/recommendations/QXNzb2NpYXRpb25SdWxlU2V0RW50aXR5Hh81Nzk5MjM2NjQxNzUxMDQw",
             "total_rules": 12
         }
 ```
@@ -146,7 +146,7 @@ resource_url | string | *verbose & output only* | restful url to resource
             "confidence": 0.7474747474747475,
             "resource_id": "QXNzb2NpYXRpb25SdWxlRW50aXR5Hh82NTIwNzkxMTQ3NDc5MDQw",
             "resource_type": "AssociationRuleModel",
-            "resource_url": "/api/rest/v1.0/recommendation/QXNzb2NpYXRpb25SdWxlRW50aXR5Hh82NTIwNzkxMTQ3NDc5MDQw",
+            "resource_url": "/api/rest/v1.0/recommendations/QXNzb2NpYXRpb25SdWxlRW50aXR5Hh82NTIwNzkxMTQ3NDc5MDQw",
             "rule_key": "bread:1"
         },
 ```
@@ -399,7 +399,7 @@ Deletes all the association rules
 
 Get Latest Association Rules (by `AssociationRuleSetEntity`'s max create_date). Returned resources are sorted by `confidence` DESC
 ```
-GET /api/rest/v1.0/recommendation
+GET /api/rest/v1.0/recommendations
 ```
 
 Get Association Rules for a given `AssociationRuleSetEntity` based on its resource_id
@@ -429,7 +429,7 @@ The response body results are a list of `AssociationRule Resource Object`
             "confidence": 0.7474747474747475,
             "resource_id": "QXNzb2NpYXRpb25SdWxlRW50aXR5Hh82NTIwNzkxMTQ3NDc5MDQw",
             "resource_type": "AssociationRuleModel",
-            "resource_url": "/api/rest/v1.0/recommendation/QXNzb2NpYXRpb25SdWxlRW50aXR5Hh82NTIwNzkxMTQ3NDc5MDQw",
+            "resource_url": "/api/rest/v1.0/recommendations/QXNzb2NpYXRpb25SdWxlRW50aXR5Hh82NTIwNzkxMTQ3NDc5MDQw",
             "rule_key": "bread:1"
         },
         ...
@@ -444,7 +444,7 @@ The response body results are a list of `AssociationRule Resource Object`
 Get a set of rules from the latest rule set for a given user. This will take into account the user's preferences and return only exact matches for the user based on these preferneces.
 
 ```
-GET /api/rest/v1.0/recommendation/:user_id
+GET /api/rest/v1.0/recommendations/:user_id
 ```
 
 #### Response Body
@@ -469,7 +469,7 @@ The response body results are a list of `AssociationRule Resource Object`
             "confidence": 0.7474747474747475,
             "resource_id": "QXNzb2NpYXRpb25SdWxlRW50aXR5Hh82NTIwNzkxMTQ3NDc5MDQw",
             "resource_type": "AssociationRuleModel",
-            "resource_url": "/api/rest/v1.0/recommendation/QXNzb2NpYXRpb25SdWxlRW50aXR5Hh82NTIwNzkxMTQ3NDc5MDQw",
+            "resource_url": "/api/rest/v1.0/recommendations/QXNzb2NpYXRpb25SdWxlRW50aXR5Hh82NTIwNzkxMTQ3NDc5MDQw",
             "rule_key": "bread:1"
         },
         ...
