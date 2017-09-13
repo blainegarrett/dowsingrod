@@ -45,15 +45,38 @@ web_routes = [
                   strict_slash=True,
                   name="PreferenceCollectionHandler"),
 
+    RedirectRoute('/api/rest/v1.0/preferences',
+                  'handlers.rest.v1_0.preference_handlers.PreferenceCollectionHandler',
+                  strict_slash=True,
+                  name="PreferenceCollectionHandler"),
 
     RedirectRoute('/api/rest/v1.0/preferences/<resource_id:\w+>',
                   'handlers.rest.v1_0.preference_handlers.PreferenceDetailHandler',
                   strict_slash=True,
                   name="PreferenceDetailHandler"),
-    RedirectRoute('/api/rest/v1.0/preferences',
-                  'handlers.rest.v1_0.preference_handlers.PreferenceCollectionHandler',
+
+    RedirectRoute('/api/rest/v1.0/items',
+                  'handlers.rest.v1_0.item_handlers.ItemCollectionHandler',
                   strict_slash=True,
-                  name="PreferenceCollectionHandler"),
+                  name="ItemCollectionHandler"),
+
+    # Not Implemented
+    RedirectRoute('/api/rest/v1.0/items/<resource_id:\w+>',
+                  'handlers.rest.v1_0.item_handlers.ItemDetailHandler',
+                  strict_slash=True,
+                  name="ItemDetailHandler"),
+
+    RedirectRoute('/api/rest/v1.0/transactions',
+                  'handlers.rest.v1_0.transaction_handlers.TransactionCollectionHandler',
+                  strict_slash=True,
+                  name="TransactionCollectionHandler"),
+
+    # Not Implemented
+    RedirectRoute('/api/rest/v1.0/transactions/<user_id:\w+>',
+                  'handlers.rest.v1_0.transaction_handlers.TransactionDetailHandler',
+                  strict_slash=True,
+                  name="TransactionDetailHandler"),
+
 
     RedirectRoute('/api/rest/v1.0/sync',
                   'handlers.rest.v1_0.recommendation_handlers.SyncHandler',

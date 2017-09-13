@@ -88,3 +88,29 @@ class AssociationRuleModel(Model):
 
         # Concat them together
         return '__'.join(cleaned_items)
+
+
+class ItemModel(Model):
+    """
+    Lightweight object for representing a preference record
+    """
+    item_id = ndb.StringProperty()
+    user_ids = ndb.StringProperty(repeated=True)
+    total_preferences = ndb.IntegerProperty()
+    total_likes = ndb.IntegerProperty()
+    total_dislikes = ndb.IntegerProperty()
+    created_timestamp = ndb.DateTimeProperty()
+    latest_timestamp = ndb.DateTimeProperty()
+
+
+class TransactionModel(Model):
+    """
+    Lightweight object for representing a preference record
+    """
+    rule_item_ids = ndb.StringProperty(repeated=True)
+    user_id = ndb.StringProperty()  # Aligns with PreferenceModel.user_id
+    total_preferences = ndb.IntegerProperty()
+    total_likes = ndb.IntegerProperty()
+    total_dislikes = ndb.IntegerProperty()
+    created_timestamp = ndb.DateTimeProperty()
+    latest_timestamp = ndb.DateTimeProperty()

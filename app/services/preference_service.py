@@ -3,7 +3,8 @@ Preference Service
 
 Please keep the service layer agnostic to persistance layer (api) or communication layer (handlers)
 """
-
+from services import item_service
+from services import transaction_service
 from api import preference_api
 
 
@@ -27,13 +28,9 @@ def record_preference(preference_models):
     # Iterate over all the persistance models and convert to ndb models
     preference_models = preference_api.create_multi(preference_models)
 
-
-    # Update item histogram
-    # transaction_service.record_preference(preference_models)
-    # fire off deferred task to update
-
-    # Update user txn data
-    # items_service.record_preference(preference_models)
+    # Update item histogram  # TODO: Perhaps do this in a deferred task
+    item_service.update_item(preference_models)
+    transaction_service.update_transaction(preference_models)
 
     if (is_single):
         return preference_models[0]

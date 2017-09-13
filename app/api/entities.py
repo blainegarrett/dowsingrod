@@ -36,3 +36,29 @@ class AssociationRuleSetEntity(ndb.Model):
     total_rules = ndb.IntegerProperty()
     created_timestamp = ndb.DateTimeProperty(auto_now_add=True)
     is_default = ndb.BooleanProperty()  # Is the default ruleset
+
+
+class PreferenceTransactionEntity(ndb.Model):
+    """
+    Persistance Model for storing items preferenced by a user
+    """
+    rule_item_ids = ndb.StringProperty(repeated=True)
+    user_id = ndb.StringProperty(indexed=True)  # Aligns with PreferenceModel.user_id
+    total_preferences = ndb.IntegerProperty(indexed=True)
+    total_likes = ndb.IntegerProperty(indexed=True)
+    total_dislikes = ndb.IntegerProperty(indexed=True)
+    created_timestamp = ndb.DateTimeProperty(auto_now_add=True)
+    latest_timestamp = ndb.DateTimeProperty(auto_now=True)
+
+
+class PreferenceItemEntity(ndb.Model):
+    """
+    Persistance Model for storing usages of an item in preferences
+    """
+    item_id = ndb.StringProperty(indexed=True)
+    user_ids = ndb.StringProperty(repeated=True)
+    total_preferences = ndb.IntegerProperty(indexed=True)
+    total_likes = ndb.IntegerProperty(indexed=True)
+    total_dislikes = ndb.IntegerProperty(indexed=True)
+    created_timestamp = ndb.DateTimeProperty(auto_now_add=True)
+    latest_timestamp = ndb.DateTimeProperty(auto_now=True)

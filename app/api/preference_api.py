@@ -145,6 +145,8 @@ def get_txn_data():
     {'session_id': ['Peanut Butter:0', 'Beer:1', 'Jelly:1', Bread:2']}
     """
 
+    # TODO: Simply query transaction_api.query()
+
     next_cursor = None
     txn_sets_map = {}
     more = True
