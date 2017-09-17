@@ -55,3 +55,7 @@ deploy:
 
 deploy_prod:
 	appcfg.py update -A pref-service -V $(filter-out $@,$(MAKECMDGOALS)) ./app/app.yaml
+
+
+# Update indexes
+# appcfg.py update_indexes -A pref-service ./app
