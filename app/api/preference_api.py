@@ -8,7 +8,6 @@ from google.appengine.datastore.datastore_query import Cursor
 from api.entities import PreferenceEntity
 from models import PreferenceModel
 from api.constants import DEFAULT_QUERY_LIMIT
-from api.constants import BATCH_SIZE
 from rest_core.utils import get_resource_id_from_key, get_key_from_resource_id
 
 
@@ -135,29 +134,3 @@ def _query_preference_entities(limit=DEFAULT_QUERY_LIMIT, cursor=None, *args, **
 
     entites, cursor, more = q.fetch_page(limit, start_cursor=cursor)
     return entites, cursor, more
-
-
-def get_txn_data():
-    """
-    Batch query for all preferences and group into transaction list format
-    Note: This by passes models for speed and thus cursor is native db cursor
-
-    {'session_id': ['Peanut Butter:0', 'Beer:1', 'Jelly:1', Bread:2']}
-    """
-
-    # TODO: Simply query transaction_api.query()
-
-    next_cursor = None
-    txn_sets_map = {}
-    more = True
-
-    while(more):
-        # Fetch data iterator for preference entities
-        preference_entities, next_cursor, more = _query_preference_entities(limit=BATCH_SIZE,
-                                                                            cursor=next_cursor)
-        for pref in preference_entities:
-            if pref.user_id not in txn_sets_map:
-                txn_sets_map[pref.user_id] = set()
-            txn_sets_map[pref.user_id].add(pref.get_rule_item_id())
-
-    return txn_sets_map.values()

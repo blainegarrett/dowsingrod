@@ -2,6 +2,7 @@
 from google.appengine.ext import ndb
 from google.appengine.datastore.datastore_query import Cursor
 from api.constants import DEFAULT_QUERY_LIMIT
+from api.constants import BATCH_SIZE
 
 from models import TransactionModel
 from api.entities import PreferenceTransactionEntity
@@ -100,3 +101,26 @@ def create_or_update_multi(user_id, pref_data_tuples):
 
     entity.put()
     return entity
+
+
+def get_txn_data():
+    """
+    Return a list of up to the latest 1000 sets of rule_key_ids to be used directly in the a priori
+
+    eg a list of {'Peanut Butter:0', 'Beer:1', 'Jelly:1', Bread:2'}
+    """
+
+    next_cursor = None
+    txn_sets_map = []
+    more = True
+    total_found = 0
+
+    while(more and total_found < 1000):
+        # Fetch data iterator for preference entities
+        preference_entities, next_cursor, more = _query_entities(limit=BATCH_SIZE,
+                                                                 cursor=next_cursor)
+        for pref in preference_entities:
+            txn_sets_map.append(set(pref.rule_item_ids))
+
+        total_found += 1
+    return txn_sets_map

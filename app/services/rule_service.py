@@ -1,6 +1,6 @@
 from google.appengine.ext import ndb  # TODO: Refactor this out
 from api import mining_api
-from api import preference_api
+from api import transaction_api
 from furious.async import Async
 import logging
 
@@ -42,9 +42,9 @@ def generate_association_rules(ruleset_id, min_support, min_confidence, make_def
     # TODO: This probably needs to be split up into separate async functions
     # TODO: It feels weird importing the pref_api, but we need the prefs in our specific format
     log_args = (ruleset_id, min_support, min_confidence)
-    logging.info("Starting Generation of Ruleset Completed with id %s - %s - %s " % log_args)
+    logging.info("Starting Generation of Ruleset with id %s - %s - %s " % log_args)
 
-    txn_data = preference_api.get_txn_data()
+    txn_data = transaction_api.get_txn_data()  # a list of sets of pref rule keys
 
     # TODO: Create an association_rule entity
 
@@ -62,7 +62,7 @@ def generate_association_rules(ruleset_id, min_support, min_confidence, make_def
         e = mining_api._populate_ruleset_entity(ruleset_model)
         e.put()
 
-    logging.info("Completing generation of Ruleset Completed with id %s - %s - %s " % log_args)
+    logging.info("Completing generation of Ruleset completed with id %s - %s - %s " % log_args)
     logging.info("New ruleset contains %s rules" % len(rule_models))
     if (make_default):
         logging.info("New ruleset is now default")
