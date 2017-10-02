@@ -1,5 +1,5 @@
 """
-Description     : Simple Python implementation of the Apriori Algorithm
+Description: Simple Python implementation of the Apriori Algorithm
 """
 
 from models import AssociationRuleModel
@@ -9,6 +9,7 @@ from collections import defaultdict
 
 MIN_CONFIDENCE = 0.6
 MIN_SUPPORT = .15
+MAX_K = 5  # Max size of combination to compare, prevents massive trees for sparce matricies
 
 
 def subsets(arr):
@@ -87,7 +88,7 @@ def runApriori(dataset_iter, min_support, min_confidence):
 
     currentLSet = oneCSet
     k = 2
-    while(currentLSet != set([])):
+    while(currentLSet != set([]) and k <= MAX_K):
         largeSet[k - 1] = currentLSet
         currentLSet = joinSet(currentLSet, k)
         currentCSet = returnItemsWithMinSupport(currentLSet,

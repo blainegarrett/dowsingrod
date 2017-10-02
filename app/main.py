@@ -77,7 +77,6 @@ web_routes = [
                   strict_slash=True,
                   name="TransactionDetailHandler"),
 
-
     RedirectRoute('/api/rest/v1.0/sync',
                   'handlers.rest.v1_0.recommendation_handlers.SyncHandler',
                   strict_slash=True,
